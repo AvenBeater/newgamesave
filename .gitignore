@@ -1,0 +1,44 @@
+# ── Secretos ──
+.env
+.env.local
+.env.*.local
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Virtualenv ──
+venv/
+env/
+ENV/
+.venv/
+
+# ── IDE / editores ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ──
+*.log
+logs/
+
+# ── Claude Code (sesión local) ──
+.claude/

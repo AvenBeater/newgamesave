@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gamewise</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.7/hls.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Gamewise</h1>
+    <p class="subtitle" id="ui-subtitle">Compara precios de juegos en tiempo real</p>
+    <div class="rate-badge"><span class="dot"></span><span id="rate-text">Cargando...</span></div>
+  </header>
+
+  <div class="controls-bar">
+    <select class="ctrl-select" id="sel-lang" onchange="onLangChange()">
+      <option value="es">&#127758; Español</option>
+      <option value="en">&#127482;&#127480; English</option>
+      <option value="pt">&#127463;&#127479; Português</option>
+      <option value="fr">&#127467;&#127479; Français</option>
+    </select>
+    <select class="ctrl-select" id="sel-currency" onchange="onCurrencyChange()">
+      <option value="COP">&#127464;&#127476; COP</option>
+      <option value="USD">&#127482;&#127480; USD</option>
+      <option value="MXN">&#127474;&#127485; MXN</option>
+      <option value="ARS">&#127462;&#127479; ARS</option>
+      <option value="BRL">&#127463;&#127479; BRL</option>
+      <option value="EUR">&#127466;&#127482; EUR</option>
+    </select>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-search" onclick="switchTab('search')">&#128269; Buscar juego</button>
+    <button class="tab" id="tab-wishlist" onclick="switchTab('wishlist')">&#10084; Mi Wishlist <span class="tab-badge zero" id="wl-deal-badge">0</span></button>
+  </div>
+
+  <!-- TAB: BUSCAR -->
+  <div id="pane-search">
+    <div class="search-section">
+      <div class="search-box">
+        <input type="text" id="search-input" autocomplete="off" placeholder="Busca un juego...">
+        <button class="btn-clear" id="btn-clear" onclick="clearSearch()" style="display:none">&times;</button>
+        <button class="btn-search" id="btn-search" onclick="searchGame()">Buscar precios</button>
+      </div>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+    <div class="loading" id="loading"><div class="spinner"></div><p id="ui-loading">Consultando tiendas...</p></div>
+    <div id="results-section" style="display:none">
+      <div class="results-header">
+        <h2 id="game-title"></h2>
+        <span class="game-subtitle" id="game-subtitle"></span>
+        <div class="view-controls">
+          <button class="view-btn active" id="btn-grid"  onclick="setView('grid')"  title="Grid">&#x229E;</button>
+          <button class="view-btn"        id="btn-list"  onclick="setView('list')"  title="List">&#9776;</button>
+          <button class="view-btn"        id="btn-table" onclick="setView('table')" title="Table">&#x229F;</button>
+        </div>
+      </div>
+      <div class="game-card" id="best-deal"></div>
+      <div class="status"    id="status"></div>
+      <div class="price-grid" id="price-grid"></div>
+    </div>
+    <div class="empty" id="empty">
+      <div class="icon">&#127918;</div>
+      <p id="ui-empty">Busca un juego para ver los precios comparados</p>
+    </div>
+  </div>
+
+  <!-- TAB: WISHLIST -->
+  <div id="pane-wishlist" style="display:none">
+    <div class="search-section">
+      <div class="search-box">
+        <input type="text" id="wishlist-input" autocomplete="off"
+               placeholder="Steam ID, nombre de perfil o URL de Steam" oninput="updateWlClearBtn()">
+        <button class="btn-clear" id="btn-wl-clear" onclick="clearWishlistSearch()" style="display:none">&times;</button>
+        <button class="btn-search" id="btn-wishlist" onclick="loadWishlist()">&#10084; Cargar wishlist</button>
+      </div>
+      <p class="wl-hint">El perfil debe ser <strong>público</strong> &middot;
+        <a href="https://steamcommunity.com/my/edit/settings" target="_blank">Configurar privacidad &#8599;</a>
+      </p>
+    </div>
+    <div class="loading" id="wl-loading" style="display:none">
+      <div class="spinner"></div><p>Cargando wishlist...</p>
+    </div>
+    <div id="wl-results" style="display:none">
+      <div class="results-header">
+        <h2 id="wl-title">Mi Wishlist</h2>
+        <span class="game-subtitle" id="wl-subtitle"></span>
+        <div class="wl-sort-bar">
+          <span class="wl-sort-label">Ordenar:</span>
+          <button class="wl-sort-btn active" id="wsort-discount" onclick="sortWishlist('discount')">Descuento</button>
+          <button class="wl-sort-btn" id="wsort-price"    onclick="sortWishlist('price')">Precio</button>
+          <button class="wl-sort-btn" id="wsort-name"     onclick="sortWishlist('name')">Nombre</button>
+          <button class="wl-sort-btn" id="wsort-duration" onclick="sortWishlist('duration')" disabled title="Cargando tiempos de juego...">⏱ Duración</button>
+          <button class="wl-sort-btn" id="wsort-reviews" onclick="sortWishlist('reviews')" disabled title="Cargando reviews de Steam...">⭐ Steam Reviews</button>
+          <button class="wl-sort-btn" id="wsort-metacritic" onclick="sortWishlist('metacritic')" disabled title="Cargando scores de Metacritic...">MC Score</button>
+          <span class="wl-sort-sep"></span>
+          <span class="wl-sort-label">Por página:</span>
+          <button class="wl-sort-btn active" id="wpp-20" onclick="setPerPage(20)">20</button>
+          <button class="wl-sort-btn" id="wpp-40" onclick="setPerPage(40)">40</button>
+          <button class="wl-sort-btn" id="wpp-60" onclick="setPerPage(60)">60</button>
+        </div>
+      </div>
+      <div id="wl-progress" class="wl-progress-wrap" style="display:none">
+        <div class="wl-progress-bar">
+          <div id="wl-progress-fill" class="wl-progress-fill"></div>
+        </div>
+        <div class="wl-progress-status"><div class="wl-progress-spinner"></div><span id="wl-progress-text" class="wl-progress-text">Cargando precios... 0 / 0</span></div>
+      </div>
+      <div id="wl-duration-progress" class="wl-progress-wrap" style="display:none">
+        <div class="wl-progress-bar">
+          <div id="wl-duration-progress-fill" class="wl-progress-fill"></div>
+        </div>
+        <div class="wl-progress-status"><div class="wl-progress-spinner"></div><span id="wl-duration-progress-text" class="wl-progress-text">Cargando duración... 0 / 0</span></div>
+      </div>
+      <div class="wl-search-wrap" id="wl-search-wrap" style="display:none">
+        <input type="text" id="wl-search" class="wl-search-input" placeholder="Buscar en tu wishlist..." autocomplete="off">
+        <button class="wl-search-clear" id="wl-search-clear" title="Limpiar">&times;</button>
+      </div>
+      <div class="wl-grid" id="wl-grid"></div>
+      <div id="wl-pagination" class="wl-pagination" style="display:none"></div>
+    </div>
+    <div class="empty" id="wl-empty">
+      <div class="icon">&#10084;</div>
+      <p>Ingresa tu Steam ID, nombre de perfil o URL para ver los precios de tu wishlist</p>
+    </div>
+  </div>
+
+</div>
+<footer id="ui-footer">Gamewise &mdash; Tasa actualizada en tiempo real</footer>
+
+<!--
+  AdSense slot — vacío hasta aprobar AdSense + deploy.
+  Cómo activar (cuando tengas tu publisher ID):
+    1. Añadir en <head>:
+       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    2. Quitar el style="display:none" del div de abajo.
+    3. Sustituir el contenido interno del div por:
+       <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXX" data-ad-slot="YYYYYYYYYY" data-ad-format="auto" data-full-width-responsive="true"></ins>
+       <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+-->
+<div id="ad-slot-bottom" class="ad-slot" style="display:none" aria-hidden="true">
+  <span class="ad-slot-placeholder">Espacio reservado para anuncio</span>
+</div>
+
+<button class="scroll-top" id="scroll-top" title="Scroll to top">&#8593;</button>
+
+<!-- Widget de donación (PayPal) -->
+<div class="donate-fab-wrap">
+  <button class="donate-fab" id="donate-fab" aria-label="Inv&iacute;tame un caf&eacute;" onclick="toggleDonate()">
+    <span aria-hidden="true">&#9749;</span>
+  </button>
+  <div class="donate-card" id="donate-card" role="dialog" aria-hidden="true">
+    <button class="donate-close" onclick="toggleDonate()" aria-label="Cerrar">&times;</button>
+    <div class="donate-title" id="donate-title">Inv&iacute;tame un caf&eacute;</div>
+    <p class="donate-msg" id="donate-msg">Cualquier tacita de caf&eacute; que me quieras brindar, ser&aacute; bienvenido en esta casa</p>
+    <a class="donate-btn" id="donate-link" href="https://www.paypal.com/donate?business=aaaguirre.albert%40gmail.com&item_name=Gamewise+Coffee+Tip&currency_code=USD" target="_blank" rel="noopener noreferrer">
+      <span aria-hidden="true">&#9829;</span>&nbsp;<span id="donate-btn-label">Donar con PayPal</span>
+    </a>
+  </div>
+</div>
+
+<script src="/static/i18n.js"></script>
+<script src="/static/helpers.js"></script>
+<script src="/static/media.js"></script>
+<script src="/static/render.js"></script>
+<script src="/static/search.js"></script>
+<script src="/static/wishlist-hltb.js"></script>
+<script src="/static/wishlist-reviews.js"></script>
+<script src="/static/wishlist-metacritic.js"></script>
+<script src="/static/wishlist.js"></script>
+<script src="/static/app.js"></script>
+<script>
+// Restaurar Steam ID y auto-cargar wishlist si estaba guardado
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var savedId = localStorage.getItem('gamewise_steamid');
+    if (savedId) {
+      var input = document.getElementById('wishlist-input');
+      if (input) {
+        input.value = savedId;
+        updateWlClearBtn();
+        switchTab('wishlist');
+        loadWishlist();
+      }
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>

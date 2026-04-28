@@ -1,0 +1,15 @@
+# routes/__init__.py — Registro centralizado de blueprints
+
+from .home import bp_home
+from .prices import bp_prices
+from .wishlist import bp_wishlist
+from .scores import bp_scores
+
+
+ALL_BLUEPRINTS = [bp_home, bp_prices, bp_wishlist, bp_scores]
+
+
+def register_all(app):
+    """Registra todos los blueprints en la app Flask."""
+    for bp in ALL_BLUEPRINTS:
+        app.register_blueprint(bp)
