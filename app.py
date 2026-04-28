@@ -1,4 +1,6 @@
-# Gamewise
+# Gamewise — MIT License — Copyright (c) 2026 Albert Aguirre (AvenBeater)
+# https://github.com/AvenBeater/gamewise
+#
 # v2.2.0 - Rebrand GameDeals → Gamewise + PayPal donate widget + AdSense slot
 # v2.1.0 - Refactor: rutas en blueprints (backend/routes/) + cachés centralizados
 # v2.0.0 - Refactor inicial en módulos
