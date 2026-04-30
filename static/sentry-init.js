@@ -14,6 +14,10 @@
 
   Sentry.init({
     dsn: dsn,
+    // Ruta los envelopes a /sentry-tunnel (mismo origen) en vez de
+    // *.ingest.sentry.io directo. El backend hace el forward al ingest real
+    // y así sorteamos los ad blockers que tienen Sentry en EasyPrivacy.
+    tunnel: '/sentry-tunnel',
     sendDefaultPii: true,
     tracesSampleRate: 0.1,
     // Reduce ruido: ignora errores comunes de extensiones / bots
