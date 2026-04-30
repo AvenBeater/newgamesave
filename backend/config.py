@@ -9,12 +9,35 @@ try:
 except ImportError:
     pass
 
+# ── Sentry (errores en backend) ──────────────────────────────────────────────
+# Init temprano: se hace antes de que Flask reciba requests.
+# Si SENTRY_DSN_BACKEND no está seteado, simplemente no se inicializa (modo dev sin tracking).
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.flask import FlaskIntegration
+
+    _sentry_dsn = os.environ.get("SENTRY_DSN_BACKEND", "").strip()
+    if _sentry_dsn:
+        sentry_sdk.init(
+            dsn=_sentry_dsn,
+            integrations=[FlaskIntegration()],
+            send_default_pii=True,
+            traces_sample_rate=0.1,  # 10% de requests para performance monitoring
+            release=os.environ.get("RAILWAY_GIT_COMMIT_SHA") or "dev",
+            environment=os.environ.get("RAILWAY_ENVIRONMENT") or "local",
+        )
+except ImportError:
+    pass
+
 ITAD_API_KEY = os.environ.get("ITAD_API_KEY", "").strip()
 if not ITAD_API_KEY:
     raise RuntimeError(
         "ITAD_API_KEY no configurado. Crea un archivo .env en la raíz del proyecto "
         "con la línea ITAD_API_KEY=tu_clave_aqui (ver .env.example)."
     )
+
+# DSN público del frontend, expuesto al template para inicializar Sentry en el browser
+SENTRY_DSN_FRONTEND = os.environ.get("SENTRY_DSN_FRONTEND", "").strip()
 
 CURRENCY_CONFIG = {
     "COP": {"cc": "CO", "itad_country": "CO", "symbol": "$",    "fallback_usd_rate": 4200},

@@ -2,7 +2,7 @@
 
 from flask import Blueprint, Response, redirect, render_template
 
-from ..config import FAVICON_SVG
+from ..config import FAVICON_SVG, SENTRY_DSN_FRONTEND
 
 
 bp_home = Blueprint("home", __name__)
@@ -10,7 +10,7 @@ bp_home = Blueprint("home", __name__)
 
 @bp_home.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", sentry_dsn=SENTRY_DSN_FRONTEND)
 
 
 @bp_home.route("/favicon.svg")
