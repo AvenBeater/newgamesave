@@ -28,9 +28,19 @@ function switchTab(tab) {
 
 
 // ── Caché wishlist en localStorage ──────────────────────────────
-var WL_CACHE_KEY = 'gamewise_wishlist_v2';
+var WL_CACHE_KEY = 'newgamesave_wishlist_v2';
 (function() {
-  ['gamewise_wishlist_v1'].forEach(function(k) { localStorage.removeItem(k); });
+  // Migración Gamewise → NewGame+Save: rescata steamid, limpia el resto
+  try {
+    var oldId = localStorage.getItem('gamewise_steamid');
+    if (oldId && !localStorage.getItem('newgamesave_steamid')) {
+      localStorage.setItem('newgamesave_steamid', oldId);
+    }
+  } catch(e) {}
+  [
+    'gamewise_steamid', 'gamewise_wishlist_v1', 'gamewise_wishlist_v2',
+    'gamewise_hltb_v1', 'gamewise_metacritic_v1', 'gamewise_reviews_v1',
+  ].forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
 })();
 var WL_CACHE_TTL = 30 * 60 * 1000;
 
@@ -69,11 +79,11 @@ function loadWishlist() {
   if (!steamId) { document.getElementById('wishlist-input').focus(); return; }
 
   try {
-    var prevId = localStorage.getItem('gamewise_steamid');
+    var prevId = localStorage.getItem('newgamesave_steamid');
     if (prevId && prevId !== steamId) {
-      localStorage.removeItem('gamewise_wishlist_v1');
+      localStorage.removeItem(WL_CACHE_KEY);
     }
-    localStorage.setItem('gamewise_steamid', steamId);
+    localStorage.setItem('newgamesave_steamid', steamId);
   } catch(e) {}
 
   _wlSteamId   = steamId;

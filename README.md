@@ -1,4 +1,6 @@
-# 🎮 Gamewise — Comparador de Precios
+# 🎮 NewGame+Save — Comparador de Precios
+
+> _New Game+ para tu billetera: compara precios y ahorra antes de comprar._
 
 Compara precios de juegos en **pesos colombianos (COP)** entre Steam y múltiples tiendas externas.
 
@@ -42,4 +44,4 @@ Ejecuta `iniciar.bat`
 
 El código está bajo licencia [MIT](LICENSE). Puedes forkearlo, modificarlo y redistribuirlo, incluso comercialmente, mientras conserves el aviso de copyright.
 
-El nombre **Gamewise**, el logo y la identidad visual **no** están cubiertos por la MIT — ver [COPYRIGHT.md](COPYRIGHT.md) para detalles. Si forkeas el proyecto, debes rebrandear antes de deployar públicamente.
+El nombre **NewGame+Save**, el logo y la identidad visual **no** están cubiertos por la MIT — ver [COPYRIGHT.md](COPYRIGHT.md) para detalles. Si forkeas el proyecto, debes rebrandear antes de deployar públicamente.

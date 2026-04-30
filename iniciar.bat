@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title Gamewise
+title NewGame+Save
 
 echo ============================================
-echo   🎮  Gamewise v2.2
+echo   🎮  NewGame+Save v2.3
 echo ============================================
 echo.
 echo  Tu navegador se abrira automaticamente.

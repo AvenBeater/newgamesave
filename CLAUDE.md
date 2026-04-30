@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Gamewise is a game price comparison web app. It compares prices across Steam and multiple external stores (via IsThereAnyDeal API), displays them in the user's local currency, and includes Steam wishlist import and HowLongToBeat integration. The UI is in Spanish by default with i18n support for EN/PT/FR.
+NewGame+Save is a game price comparison web app. It compares prices across Steam and multiple external stores (via IsThereAnyDeal API), displays them in the user's local currency, and includes Steam wishlist import and HowLongToBeat integration. The UI is in Spanish by default with i18n support for EN/PT/FR.
 
 ## Running the App
 
@@ -50,4 +50,4 @@ Six currencies configured in `CURRENCY_CONFIG` (COP, USD, MXN, ARS, BRL, EUR) â€
 ## Caching Strategy
 
 - Backend: `_hltb_cache` dict (in-memory, per-process, never expires)
-- Frontend: wishlist data cached in `localStorage` with 30-min TTL (`gamewise_wishlist_v2`), HLTB results cached permanently (`gamewise_hltb_v1`), Steam ID persisted for auto-reload (`gamewise_steamid`)
+- Frontend: wishlist data cached in `localStorage` with 30-min TTL (`newgamesave_wishlist_v2`), HLTB results cached permanently (`newgamesave_hltb_v1`), Steam ID persisted for auto-reload (`newgamesave_steamid`). Legacy `gamewise_*` keys are migrated/cleaned automatically on first load.

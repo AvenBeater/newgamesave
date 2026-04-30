@@ -24,7 +24,7 @@ from urllib.parse import quote
 #        "gog": ("awin", "12345", "987654")
 #      Resultado: https://www.awin1.com/cread.php?awinmid=12345&awinaffid=987654&clickref=&ued=URL_ENCODED_ORIGINAL
 #
-# Programas relevantes para Gamewise:
+# Programas relevantes para NewGame+Save:
 #   - Humble Store     → directo en humblebundle.com/partners (param: partner=)
 #   - Fanatical        → vía Impact Radius (param: ref=)
 #   - GOG              → vía Awin (deeplink)

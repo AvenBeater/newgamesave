@@ -10,7 +10,7 @@ var _hltbRunning      = 0;
 var _hltbAbort        = null;
 var _hltbBatchTimer   = null;
 var HLTB_CONCURRENCY  = 10;
-var HLTB_LS_KEY       = 'gamewise_hltb_v1';
+var HLTB_LS_KEY       = 'newgamesave_hltb_v1';
 
 function cancelHltb() {
   _hltbQueue = [];

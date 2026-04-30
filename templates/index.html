@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Gamewise — MIT License — Copyright (c) 2026 Albert Aguirre (AvenBeater) — github.com/AvenBeater/gamewise -->
+<!-- NewGame+Save — MIT License — Copyright (c) 2026 Albert Aguirre (AvenBeater) — github.com/AvenBeater/newgamesave -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gamewise</title>
+<title>NewGame+Save</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
 <body>
 <div class="container">
   <header>
-    <h1>Gamewise</h1>
+    <h1>NewGame+Save</h1>
     <p class="subtitle" id="ui-subtitle">Compara precios de juegos en tiempo real</p>
     <div class="rate-badge"><span class="dot"></span><span id="rate-text">Cargando...</span></div>
   </header>
@@ -134,7 +134,7 @@
   </div>
 
 </div>
-<footer id="ui-footer">Gamewise &mdash; Tasa actualizada en tiempo real</footer>
+<footer id="ui-footer">NewGame+Save &mdash; Tasa actualizada en tiempo real</footer>
 
 <!--
   AdSense slot — vacío hasta aprobar AdSense + deploy.
@@ -161,7 +161,7 @@
     <button class="donate-close" onclick="toggleDonate()" aria-label="Cerrar">&times;</button>
     <div class="donate-title" id="donate-title">Inv&iacute;tame un caf&eacute;</div>
     <p class="donate-msg" id="donate-msg">Cualquier tacita de caf&eacute; que me quieras brindar, ser&aacute; bienvenido en esta casa</p>
-    <a class="donate-btn" id="donate-link" href="https://www.paypal.com/donate?business=aaaguirre.albert%40gmail.com&item_name=Gamewise+Coffee+Tip&currency_code=USD" target="_blank" rel="noopener noreferrer">
+    <a class="donate-btn" id="donate-link" href="https://www.paypal.com/donate?business=aaaguirre.albert%40gmail.com&item_name=NewGame%2BSave+Coffee+Tip&currency_code=USD" target="_blank" rel="noopener noreferrer">
       <span aria-hidden="true">&#9829;</span>&nbsp;<span id="donate-btn-label">Donar con PayPal</span>
     </a>
   </div>
@@ -181,7 +181,7 @@
 // Restaurar Steam ID y auto-cargar wishlist si estaba guardado
 document.addEventListener('DOMContentLoaded', function() {
   try {
-    var savedId = localStorage.getItem('gamewise_steamid');
+    var savedId = localStorage.getItem('newgamesave_steamid');
     if (savedId) {
       var input = document.getElementById('wishlist-input');
       if (input) {

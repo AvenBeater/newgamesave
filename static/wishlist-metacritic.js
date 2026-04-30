@@ -10,7 +10,7 @@ var _mcRunning     = 0;
 var _mcAbort       = null;
 var _mcBatchTimer  = null;
 var MC_CONCURRENCY = 10;
-var MC_LS_KEY      = 'gamewise_metacritic_v1';
+var MC_LS_KEY      = 'newgamesave_metacritic_v1';
 
 function cancelMetacritic() {
   _mcQueue = [];
