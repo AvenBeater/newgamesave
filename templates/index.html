@@ -181,16 +181,6 @@
 <script src="/static/wishlist.js"></script>
 <script src="/static/app.js"></script>
 <script>
-// Workaround Chrome mobile paint deferral: en algunos casos Blink no
-// pinta el contenido inicial hasta que ocurre un reflow. Lo forzamos
-// nosotros leyendo offsetHeight + disparando un resize sintético.
-document.addEventListener('DOMContentLoaded', function() {
-  requestAnimationFrame(function() {
-    void document.body.offsetHeight;
-    try { window.dispatchEvent(new Event('resize')); } catch(e) {}
-  });
-});
-
 // Restaurar Steam ID y auto-cargar wishlist si estaba guardado
 document.addEventListener('DOMContentLoaded', function() {
   try {
