@@ -1,1 +1,1 @@
-# backend/ — Módulos del servidor Gamewise
+# backend/ — Módulos del servidor NewGame+Save

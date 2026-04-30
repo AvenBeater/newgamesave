@@ -1,4 +1,6 @@
-# 🎮 Gamewise — Comparador de Precios
+# 🎮 NewGame+Save — Comparador de Precios
+
+> _New Game+ para tu billetera: compara precios y ahorra antes de comprar._
 
 Compara precios de juegos en **pesos colombianos (COP)** entre Steam y múltiples tiendas externas.
 
@@ -37,3 +39,9 @@ Ejecuta `iniciar.bat`
 - La tasa de cambio USD/COP se actualiza en tiempo real
 - Los precios provienen de Steam API e IsThereAnyDeal API
 - App 100% portable: no instala nada en el sistema
+
+## Licencia
+
+El código está bajo licencia [MIT](LICENSE). Puedes forkearlo, modificarlo y redistribuirlo, incluso comercialmente, mientras conserves el aviso de copyright.
+
+El nombre **NewGame+Save**, el logo y la identidad visual **no** están cubiertos por la MIT — ver [COPYRIGHT.md](COPYRIGHT.md) para detalles. Si forkeas el proyecto, debes rebrandear antes de deployar públicamente.

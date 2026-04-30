@@ -10,7 +10,7 @@ var _revRunning     = 0;
 var _revAbort       = null;
 var _revBatchTimer  = null;
 var REV_CONCURRENCY = 10;
-var REV_LS_KEY      = 'gamewise_reviews_v1';
+var REV_LS_KEY      = 'newgamesave_reviews_v1';
 
 function cancelReviews() {
   _revQueue = [];

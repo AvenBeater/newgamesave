@@ -2,3 +2,5 @@ flask>=2.0
 requests>=2.28
 howlongtobeatpy
 python-dotenv>=1.0
+sentry-sdk[flask]>=2.0
+gunicorn>=21,<24
