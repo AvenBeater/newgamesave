@@ -330,5 +330,6 @@ const CURR = {
   MXN:{symbol:"$",  locale:"es-MX",dec:2},
   ARS:{symbol:"$",  locale:"es-AR",dec:0},
   BRL:{symbol:"R$", locale:"pt-BR",dec:2},
+  CLP:{symbol:"$",  locale:"es-CL",dec:0},
   EUR:{symbol:"\u20ac", locale:"de-DE",dec:2},
 };

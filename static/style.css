@@ -221,6 +221,43 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .wl-rev-badge,.wl-mc-badge{top:8px;left:8px;border:1.5px solid transparent;}
 .wl-sort-btn:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none;}
 
+/* ── Wishlist: list view ─────────────────────────────────────── */
+.wl-grid.view-list{grid-template-columns:1fr;gap:8px;}
+.wl-grid.view-list .wl-card{display:flex;flex-direction:row;align-items:stretch;}
+.wl-grid.view-list .wl-card:hover{transform:translateY(-2px) scale(1.005);}
+.wl-grid.view-list .wl-card-cover,
+.wl-grid.view-list .wl-cover-placeholder{width:140px;height:auto;aspect-ratio:46/21;flex-shrink:0;align-self:center;}
+.wl-grid.view-list .wl-cover-placeholder{display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--muted);background:var(--surface2);}
+.wl-grid.view-list .wl-card-body{flex:1;padding:10px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-width:0;}
+.wl-grid.view-list .wl-card-name{flex:1 1 220px;margin-bottom:0;-webkit-line-clamp:2;font-size:14px;min-width:0;}
+.wl-grid.view-list .wl-card-name + div{display:flex;align-items:center;gap:14px;flex-wrap:wrap;flex-shrink:0;}
+.wl-grid.view-list .wl-best-store{font-size:9px;margin-bottom:0;}
+.wl-grid.view-list .wl-best-price{font-size:1.15rem;}
+.wl-grid.view-list .wl-best-row{margin-top:0;gap:6px;}
+.wl-grid.view-list .wl-stores-count,
+.wl-grid.view-list .wl-history-low,
+.wl-grid.view-list .wl-bundle-row{display:none;}
+.wl-grid.view-list .wl-card-btn{width:auto;padding:7px 16px;margin-top:0;flex-shrink:0;}
+.wl-grid.view-list .wl-card-loading{font-size:12px;}
+.wl-grid.view-list .wl-no-price{font-size:12px;}
+
+/* Badges en list: más compactos sobre la cover chica */
+.wl-grid.view-list .wl-hltb-badge,
+.wl-grid.view-list .wl-rev-badge,
+.wl-grid.view-list .wl-mc-badge{font-size:9px;padding:2px 5px;top:4px;letter-spacing:0;}
+.wl-grid.view-list .wl-hltb-badge{right:4px;}
+.wl-grid.view-list .wl-rev-badge,
+.wl-grid.view-list .wl-mc-badge{left:4px;}
+
+@media(max-width:540px){
+  .wl-grid.view-list .wl-card-cover,
+  .wl-grid.view-list .wl-cover-placeholder{width:96px;}
+  .wl-grid.view-list .wl-card-body{padding:8px 10px;gap:8px;}
+  .wl-grid.view-list .wl-card-name{flex:1 1 100%;}
+  .wl-grid.view-list .wl-card-btn{font-size:10px;padding:5px 12px;}
+  .wl-grid.view-list .wl-best-price{font-size:1rem;}
+}
+
 /* ── SKELETON LOADING ────────────────────────────────── */
 .wl-skeleton{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;animation:fadeUp .35s ease both;}
 .wl-skeleton-cover{width:100%;aspect-ratio:46/21;background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.5s linear infinite;}

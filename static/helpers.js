@@ -10,9 +10,91 @@ function hideCover(){
 }
 
 // ── State ───────────────────────────────────────────────────────
-var currentRate=1, currentLang="es", currentCurrency="COP";
+var currentRate=1, currentLang="en", currentCurrency="USD";
 var currentView="grid", lastData=null, lastGameName="";
 var selectedGame=null, searchTimeout=null;
+
+// ── localStorage keys para preferencias del usuario ─────────────
+var LS_LANG_KEY     = "newgamesave_lang_v1";
+var LS_CURRENCY_KEY = "newgamesave_currency_v1";
+
+// Mapping país (CF-IPCountry) → idioma + moneda. La primera visita usa
+// esto si no hay localStorage. Una vez que el usuario toca cualquiera de
+// los dos selectores, su elección queda guardada y la detección queda
+// out (localStorage gana siempre).
+var COUNTRY_DEFAULTS = {
+  AR: { lang: "es", currency: "ARS" },
+  BR: { lang: "pt", currency: "BRL" },
+  CL: { lang: "es", currency: "CLP" },
+  CO: { lang: "es", currency: "COP" },
+  MX: { lang: "es", currency: "MXN" },
+  US: { lang: "en", currency: "USD" },
+  CA: { lang: "en", currency: "USD" },
+  ES: { lang: "es", currency: "EUR" },
+  FR: { lang: "fr", currency: "EUR" },
+  BE: { lang: "fr", currency: "EUR" },
+  PT: { lang: "pt", currency: "EUR" },
+  DE: { lang: "en", currency: "EUR" },
+  IT: { lang: "en", currency: "EUR" },
+  NL: { lang: "en", currency: "EUR" },
+  AT: { lang: "en", currency: "EUR" },
+  IE: { lang: "en", currency: "EUR" },
+  LU: { lang: "fr", currency: "EUR" },
+  CH: { lang: "fr", currency: "EUR" },
+  GR: { lang: "en", currency: "EUR" },
+  FI: { lang: "en", currency: "EUR" },
+};
+
+// Si no hay país (Cloudflare proxy off, localhost) o el país no está
+// listado, caemos a navigator.language. Las claves coinciden con el
+// prefijo de los códigos típicos (es-AR, pt-PT, fr-CA...).
+var BROWSER_LANG_DEFAULTS = {
+  es: { lang: "es", currency: "COP" },
+  pt: { lang: "pt", currency: "EUR" },
+  fr: { lang: "fr", currency: "EUR" },
+};
+
+function _detectDefaults() {
+  // 1. Cloudflare country (más específico que el browser language)
+  var meta = document.querySelector('meta[name="cf-country"]');
+  var country = meta ? (meta.getAttribute("content") || "").trim().toUpperCase() : "";
+  if (country && COUNTRY_DEFAULTS[country]) return COUNTRY_DEFAULTS[country];
+
+  // 2. navigator.language (fallback)
+  var nav = (navigator.language || "en").toLowerCase().split("-")[0];
+  if (BROWSER_LANG_DEFAULTS[nav]) return BROWSER_LANG_DEFAULTS[nav];
+
+  // 3. Default duro: inglés + USD
+  return { lang: "en", currency: "USD" };
+}
+
+function _loadPrefs() {
+  // localStorage gana sobre detección. Si el usuario cambió algo antes,
+  // respetamos su elección al 100%.
+  var savedLang     = null;
+  var savedCurrency = null;
+  try {
+    savedLang     = localStorage.getItem(LS_LANG_KEY);
+    savedCurrency = localStorage.getItem(LS_CURRENCY_KEY);
+  } catch(e) {}
+
+  var defaults = _detectDefaults();
+
+  // Validar que el valor guardado siga siendo soportado (por si cambian
+  // las opciones disponibles en el futuro)
+  var validLangs = ["es", "en", "pt", "fr"];
+  var validCurrs = ["COP", "USD", "MXN", "ARS", "BRL", "CLP", "EUR"];
+
+  currentLang     = (savedLang     && validLangs.indexOf(savedLang)     !== -1) ? savedLang     : defaults.lang;
+  currentCurrency = (savedCurrency && validCurrs.indexOf(savedCurrency) !== -1) ? savedCurrency : defaults.currency;
+
+  var langSel = document.getElementById("sel-lang");
+  var curSel  = document.getElementById("sel-currency");
+  if (langSel) langSel.value = currentLang;
+  if (curSel)  curSel.value  = currentCurrency;
+
+  document.documentElement.lang = currentLang;
+}
 
 // ── Helpers ─────────────────────────────────────────────────────
 function t(k){ return (I18N[currentLang]||I18N.es)[k]||k; }
@@ -104,15 +186,35 @@ async function loadRate(){
 // ── Lang / Currency change ──────────────────────────────────────
 function onLangChange(){
   currentLang=document.getElementById("sel-lang").value;
+  try { localStorage.setItem(LS_LANG_KEY, currentLang); } catch(e) {}
+  document.documentElement.lang = currentLang;
   if(selectedGame) searchInput.value = selectedGame.name;
   applyLang();
   if(selectedGame) fetchPrices(selectedGame.id, selectedGame.name);
+  // Wishlist: re-render para refrescar textos i18n dentro de las cards
+  // (precio/moneda no cambia, no hace falta refetch)
+  if (typeof _wlGames !== 'undefined' && _wlGames.length > 0) {
+    if (typeof updateSubtitle === 'function') updateSubtitle();
+    if (typeof renderWishlistCards === 'function') renderWishlistCards();
+    var _prog = document.getElementById('wl-progress');
+    if (_prog && _prog.style.display !== 'none' && typeof updateProgress === 'function') {
+      updateProgress(typeof _wlLoaded !== 'undefined' ? _wlLoaded : 0);
+    }
+  }
 }
 
 function onCurrencyChange(){
   currentCurrency=document.getElementById("sel-currency").value;
+  try { localStorage.setItem(LS_CURRENCY_KEY, currentCurrency); } catch(e) {}
   loadRate();
   if(selectedGame) fetchPrices(selectedGame.id,selectedGame.name);
+  // Wishlist: refetch — los precios están guardados en moneda nativa,
+  // no se pueden convertir en cliente, hay que volver a pegarle al backend.
+  if (typeof _wlGames !== 'undefined' && _wlGames.length > 0 && _wlSteamId) {
+    var _wlInput = document.getElementById('wishlist-input');
+    if (_wlInput && !_wlInput.value) _wlInput.value = _wlSteamId;
+    if (typeof loadWishlist === 'function') loadWishlist();
+  }
 }
 
 // ── UI state helpers ────────────────────────────────────────────
