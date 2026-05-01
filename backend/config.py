@@ -45,6 +45,7 @@ CURRENCY_CONFIG = {
     "MXN": {"cc": "MX", "itad_country": "MX", "symbol": "$",    "fallback_usd_rate": 17},
     "ARS": {"cc": "AR", "itad_country": "AR", "symbol": "$",    "fallback_usd_rate": 900},
     "BRL": {"cc": "BR", "itad_country": "BR", "symbol": "R$",   "fallback_usd_rate": 5},
+    "CLP": {"cc": "CL", "itad_country": "CL", "symbol": "$",    "fallback_usd_rate": 950},
     "EUR": {"cc": "DE", "itad_country": "DE", "symbol": "\u20ac", "fallback_usd_rate": 0.92},
 }
 
