@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <!-- NewGame+Save — MIT License — Copyright (c) 2026 Albert Aguirre (AvenBeater) — github.com/AvenBeater/newgamesave -->
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="sentry-dsn" content="{{ sentry_dsn }}">
+<meta name="cf-country" content="{{ cf_country|default('') }}">
 <title>NewGame+Save</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,20 +19,20 @@
 <div class="container">
   <header>
     <h1>NewGame+Save</h1>
-    <p class="subtitle" id="ui-subtitle">Compara precios de juegos en tiempo real</p>
-    <div class="rate-badge"><span class="dot"></span><span id="rate-text">Cargando...</span></div>
+    <p class="subtitle" id="ui-subtitle">Compare game prices in real time</p>
+    <div class="rate-badge"><span class="dot"></span><span id="rate-text">Loading...</span></div>
   </header>
 
   <div class="controls-bar">
     <select class="ctrl-select" id="sel-lang" onchange="onLangChange()">
-      <option value="es">&#127758; Español</option>
       <option value="en">&#127482;&#127480; English</option>
+      <option value="es">&#127758; Español</option>
       <option value="pt">&#127463;&#127479; Português</option>
       <option value="fr">&#127467;&#127479; Français</option>
     </select>
     <select class="ctrl-select" id="sel-currency" onchange="onCurrencyChange()">
-      <option value="COP">&#127464;&#127476; COP</option>
       <option value="USD">&#127482;&#127480; USD</option>
+      <option value="COP">&#127464;&#127476; COP</option>
       <option value="MXN">&#127474;&#127485; MXN</option>
       <option value="ARS">&#127462;&#127479; ARS</option>
       <option value="BRL">&#127463;&#127479; BRL</option>
@@ -42,21 +43,21 @@
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" id="tab-search" onclick="switchTab('search')">&#128269; Buscar juego</button>
-    <button class="tab" id="tab-wishlist" onclick="switchTab('wishlist')">&#10084; Mi Wishlist <span class="tab-badge zero" id="wl-deal-badge">0</span></button>
+    <button class="tab active" id="tab-search" onclick="switchTab('search')">&#128269; Search game</button>
+    <button class="tab" id="tab-wishlist" onclick="switchTab('wishlist')">&#10084; My Wishlist <span class="tab-badge zero" id="wl-deal-badge">0</span></button>
   </div>
 
   <!-- TAB: BUSCAR -->
   <div id="pane-search">
     <div class="search-section">
       <div class="search-box">
-        <input type="text" id="search-input" autocomplete="off" placeholder="Busca un juego...">
+        <input type="text" id="search-input" autocomplete="off" placeholder="Search a game...">
         <button class="btn-clear" id="btn-clear" onclick="clearSearch()" style="display:none">&times;</button>
-        <button class="btn-search" id="btn-search" onclick="searchGame()">Buscar precios</button>
+        <button class="btn-search" id="btn-search" onclick="searchGame()">Search prices</button>
       </div>
       <div class="suggestions" id="suggestions"></div>
     </div>
-    <div class="loading" id="loading"><div class="spinner"></div><p id="ui-loading">Consultando tiendas...</p></div>
+    <div class="loading" id="loading"><div class="spinner"></div><p id="ui-loading">Querying stores...</p></div>
     <div id="results-section" style="display:none">
       <div class="results-header">
         <h2 id="game-title"></h2>
@@ -73,7 +74,7 @@
     </div>
     <div class="empty" id="empty">
       <div class="icon">&#127918;</div>
-      <p id="ui-empty">Busca un juego para ver los precios comparados</p>
+      <p id="ui-empty">Search a game to see compared prices</p>
     </div>
   </div>
 
@@ -82,31 +83,31 @@
     <div class="search-section">
       <div class="search-box">
         <input type="text" id="wishlist-input" autocomplete="off"
-               placeholder="Steam ID, nombre de perfil o URL de Steam" oninput="updateWlClearBtn()">
+               placeholder="Steam ID, profile name or Steam URL" oninput="updateWlClearBtn()">
         <button class="btn-clear" id="btn-wl-clear" onclick="clearWishlistSearch()" style="display:none">&times;</button>
-        <button class="btn-search" id="btn-wishlist" onclick="loadWishlist()">&#10084; Cargar wishlist</button>
+        <button class="btn-search" id="btn-wishlist" onclick="loadWishlist()">&#10084; Load wishlist</button>
       </div>
-      <p class="wl-hint">El perfil debe ser <strong>público</strong> &middot;
-        <a href="https://steamcommunity.com/my/edit/settings" target="_blank">Configurar privacidad &#8599;</a>
+      <p class="wl-hint">Profile must be <strong>public</strong> &middot;
+        <a href="https://steamcommunity.com/my/edit/settings" target="_blank">Configure privacy &#8599;</a>
       </p>
     </div>
     <div class="loading" id="wl-loading" style="display:none">
-      <div class="spinner"></div><p>Cargando wishlist...</p>
+      <div class="spinner"></div><p>Loading wishlist...</p>
     </div>
     <div id="wl-results" style="display:none">
       <div class="results-header">
-        <h2 id="wl-title">Mi Wishlist</h2>
+        <h2 id="wl-title">My Wishlist</h2>
         <span class="game-subtitle" id="wl-subtitle"></span>
         <div class="wl-sort-bar">
-          <span class="wl-sort-label">Ordenar:</span>
-          <button class="wl-sort-btn active" id="wsort-discount" onclick="sortWishlist('discount')">Descuento</button>
-          <button class="wl-sort-btn" id="wsort-price"    onclick="sortWishlist('price')">Precio</button>
-          <button class="wl-sort-btn" id="wsort-name"     onclick="sortWishlist('name')">Nombre</button>
-          <button class="wl-sort-btn" id="wsort-duration" onclick="sortWishlist('duration')" disabled title="Cargando tiempos de juego...">⏱ Duración</button>
-          <button class="wl-sort-btn" id="wsort-reviews" onclick="sortWishlist('reviews')" disabled title="Cargando reviews de Steam...">⭐ Steam Reviews</button>
-          <button class="wl-sort-btn" id="wsort-metacritic" onclick="sortWishlist('metacritic')" disabled title="Cargando scores de Metacritic...">MC Score</button>
+          <span class="wl-sort-label">Sort:</span>
+          <button class="wl-sort-btn active" id="wsort-discount" onclick="sortWishlist('discount')">Discount</button>
+          <button class="wl-sort-btn" id="wsort-price"    onclick="sortWishlist('price')">Price</button>
+          <button class="wl-sort-btn" id="wsort-name"     onclick="sortWishlist('name')">Name</button>
+          <button class="wl-sort-btn" id="wsort-duration" onclick="sortWishlist('duration')" disabled title="Loading playtimes...">⏱ Duration</button>
+          <button class="wl-sort-btn" id="wsort-reviews" onclick="sortWishlist('reviews')" disabled title="Loading Steam reviews...">⭐ Steam Reviews</button>
+          <button class="wl-sort-btn" id="wsort-metacritic" onclick="sortWishlist('metacritic')" disabled title="Loading Metacritic scores...">MC Score</button>
           <span class="wl-sort-sep"></span>
-          <span class="wl-sort-label">Por página:</span>
+          <span class="wl-sort-label">Per page:</span>
           <button class="wl-sort-btn active" id="wpp-20" onclick="setPerPage(20)">20</button>
           <button class="wl-sort-btn" id="wpp-40" onclick="setPerPage(40)">40</button>
           <button class="wl-sort-btn" id="wpp-60" onclick="setPerPage(60)">60</button>
@@ -116,29 +117,29 @@
         <div class="wl-progress-bar">
           <div id="wl-progress-fill" class="wl-progress-fill"></div>
         </div>
-        <div class="wl-progress-status"><div class="wl-progress-spinner"></div><span id="wl-progress-text" class="wl-progress-text">Cargando precios... 0 / 0</span></div>
+        <div class="wl-progress-status"><div class="wl-progress-spinner"></div><span id="wl-progress-text" class="wl-progress-text">Loading prices... 0 / 0</span></div>
       </div>
       <div id="wl-duration-progress" class="wl-progress-wrap" style="display:none">
         <div class="wl-progress-bar">
           <div id="wl-duration-progress-fill" class="wl-progress-fill"></div>
         </div>
-        <div class="wl-progress-status"><div class="wl-progress-spinner"></div><span id="wl-duration-progress-text" class="wl-progress-text">Cargando duración... 0 / 0</span></div>
+        <div class="wl-progress-status"><div class="wl-progress-spinner"></div><span id="wl-duration-progress-text" class="wl-progress-text">Loading duration... 0 / 0</span></div>
       </div>
       <div class="wl-search-wrap" id="wl-search-wrap" style="display:none">
-        <input type="text" id="wl-search" class="wl-search-input" placeholder="Buscar en tu wishlist..." autocomplete="off">
-        <button class="wl-search-clear" id="wl-search-clear" title="Limpiar">&times;</button>
+        <input type="text" id="wl-search" class="wl-search-input" placeholder="Search in your wishlist..." autocomplete="off">
+        <button class="wl-search-clear" id="wl-search-clear" title="Clear">&times;</button>
       </div>
       <div class="wl-grid" id="wl-grid"></div>
       <div id="wl-pagination" class="wl-pagination" style="display:none"></div>
     </div>
     <div class="empty" id="wl-empty">
       <div class="icon">&#10084;</div>
-      <p>Ingresa tu Steam ID, nombre de perfil o URL para ver los precios de tu wishlist</p>
+      <p>Enter your Steam ID, profile name or URL to see your wishlist prices</p>
     </div>
   </div>
 
 </div>
-<footer id="ui-footer">NewGame+Save &mdash; Tasa actualizada en tiempo real</footer>
+<footer id="ui-footer">NewGame+Save &mdash; Rate updated in real time</footer>
 
 <!--
   AdSense slot — vacío hasta aprobar AdSense + deploy.
@@ -151,22 +152,22 @@
        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 -->
 <div id="ad-slot-bottom" class="ad-slot" style="display:none" aria-hidden="true">
-  <span class="ad-slot-placeholder">Espacio reservado para anuncio</span>
+  <span class="ad-slot-placeholder">Ad slot reserved</span>
 </div>
 
 <button class="scroll-top" id="scroll-top" title="Scroll to top">&#8593;</button>
 
 <!-- Widget de donación (PayPal) -->
 <div class="donate-fab-wrap">
-  <button class="donate-fab" id="donate-fab" aria-label="Inv&iacute;tame un caf&eacute;" onclick="toggleDonate()">
+  <button class="donate-fab" id="donate-fab" aria-label="Buy me a coffee" onclick="toggleDonate()">
     <span aria-hidden="true">&#9749;</span>
   </button>
   <div class="donate-card" id="donate-card" role="dialog" aria-hidden="true">
-    <button class="donate-close" onclick="toggleDonate()" aria-label="Cerrar">&times;</button>
-    <div class="donate-title" id="donate-title">Inv&iacute;tame un caf&eacute;</div>
-    <p class="donate-msg" id="donate-msg">Cualquier tacita de caf&eacute; que me quieras brindar, ser&aacute; bienvenido en esta casa</p>
+    <button class="donate-close" onclick="toggleDonate()" aria-label="Close">&times;</button>
+    <div class="donate-title" id="donate-title">Buy me a coffee</div>
+    <p class="donate-msg" id="donate-msg">Any coffee you'd like to share will be welcome in this house</p>
     <a class="donate-btn" id="donate-link" href="https://www.paypal.com/donate?business=aaaguirre.albert%40gmail.com&item_name=NewGame%2BSave+Coffee+Tip&currency_code=USD" target="_blank" rel="noopener noreferrer">
-      <span aria-hidden="true">&#9829;</span>&nbsp;<span id="donate-btn-label">Donar con PayPal</span>
+      <span aria-hidden="true">&#9829;</span>&nbsp;<span id="donate-btn-label">Donate with PayPal</span>
     </a>
   </div>
 </div>
