@@ -45,6 +45,7 @@ CURRENCY_CONFIG = {
     "MXN": {"cc": "MX", "itad_country": "MX", "symbol": "$",    "fallback_usd_rate": 17},
     "ARS": {"cc": "AR", "itad_country": "AR", "symbol": "$",    "fallback_usd_rate": 900},
     "BRL": {"cc": "BR", "itad_country": "BR", "symbol": "R$",   "fallback_usd_rate": 5},
+    "CLP": {"cc": "CL", "itad_country": "CL", "symbol": "$",    "fallback_usd_rate": 950},
     "EUR": {"cc": "DE", "itad_country": "DE", "symbol": "\u20ac", "fallback_usd_rate": 0.92},
 }
 
@@ -53,17 +54,48 @@ STEAM_LANG = {
 }
 
 STORE_NAMES = {
-    "steam": "Steam", "humblestore": "Humble Store", "fanatical": "Fanatical",
-    "gog": "GOG", "epicgames": "Epic Games", "gamebillet": "GameBillet",
-    "wingamestore": "WinGameStore", "greenman": "Green Man Gaming",
-    "indiegala": "IndieGala", "voidu": "Voidu",
+    # Slug usado por el Steam direct fetch (no pasa por ITAD)
+    "steam": "Steam",
+    # IDs numéricos de ITAD (lo que viene en el campo shop.id de los deals)
+    "2":  "AllYouPlay",
+    "13": "DLGamer",
+    "15": "DreamGame",
+    "19": "2game",
+    "24": "GamersGate",
+    "50": "Nuuvem",
+    "65": "JoyBuggy",
+    "70": "Playsum",
+    "75": "Fortuna Digital",
+    "76": "Gamesporium",
 }
 
 STORE_COLORS = {
-    "steam": "#1b2838", "humblestore": "#e8704a", "fanatical": "#e4003a",
-    "gog": "#7c2d8e", "epicgames": "#2d2d2d", "gamebillet": "#0078d4",
-    "wingamestore": "#2ecc71", "greenman": "#78b900",
-    "indiegala": "#c0392b", "voidu": "#ff6b35",
+    # Slug del Steam direct fetch
+    "steam": "#1b2838",
+    # IDs numéricos de ITAD. Los 8 mapeos antiguos (humblestore/fanatical/gog/
+    # epicgames/gamebillet/wingamestore/greenman/indiegala) estaban con slugs
+    # rotos y por eso aparecían siempre en gris — al cambiar la key al ID
+    # numérico que llega en el deal, recuperan su color sin más cambios.
+    "6":  "#e4003a",  # Fanatical
+    "16": "#2d2d2d",  # Epic Game Store
+    "20": "#0078d4",  # GameBillet
+    "35": "#7c2d8e",  # GOG
+    "36": "#78b900",  # GreenManGaming
+    "37": "#e8704a",  # Humble Store
+    "42": "#c0392b",  # IndieGala Store
+    "61": "#1b2838",  # Steam (cuando viene vía ITAD, no via direct fetch)
+    "64": "#2ecc71",  # WinGameStore
+    # Tiendas nuevas registradas en STORE_NAMES
+    "2":  "#7eb53b",  # AllYouPlay
+    "13": "#1d2d44",  # DLGamer
+    "15": "#fcd116",  # DreamGame
+    "19": "#ff6b00",  # 2game
+    "24": "#3a78c2",  # GamersGate
+    "50": "#ff8000",  # Nuuvem
+    "65": "#9b59b6",  # JoyBuggy
+    "70": "#f59e0b",  # Playsum
+    "75": "#8b0000",  # Fortuna Digital
+    "76": "#16a085",  # Gamesporium
 }
 
 LANG_LABELS = {"es": "ES", "en": "EN", "pt": "PT", "fr": "FR"}
