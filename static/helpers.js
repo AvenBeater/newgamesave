@@ -107,12 +107,29 @@ function onLangChange(){
   if(selectedGame) searchInput.value = selectedGame.name;
   applyLang();
   if(selectedGame) fetchPrices(selectedGame.id, selectedGame.name);
+  // Wishlist: re-render para refrescar textos i18n dentro de las cards
+  // (precio/moneda no cambia, no hace falta refetch)
+  if (typeof _wlGames !== 'undefined' && _wlGames.length > 0) {
+    if (typeof updateSubtitle === 'function') updateSubtitle();
+    if (typeof renderWishlistCards === 'function') renderWishlistCards();
+    var _prog = document.getElementById('wl-progress');
+    if (_prog && _prog.style.display !== 'none' && typeof updateProgress === 'function') {
+      updateProgress(typeof _wlLoaded !== 'undefined' ? _wlLoaded : 0);
+    }
+  }
 }
 
 function onCurrencyChange(){
   currentCurrency=document.getElementById("sel-currency").value;
   loadRate();
   if(selectedGame) fetchPrices(selectedGame.id,selectedGame.name);
+  // Wishlist: refetch — los precios están guardados en moneda nativa,
+  // no se pueden convertir en cliente, hay que volver a pegarle al backend.
+  if (typeof _wlGames !== 'undefined' && _wlGames.length > 0 && _wlSteamId) {
+    var _wlInput = document.getElementById('wishlist-input');
+    if (_wlInput && !_wlInput.value) _wlInput.value = _wlSteamId;
+    if (typeof loadWishlist === 'function') loadWishlist();
+  }
 }
 
 // ── UI state helpers ────────────────────────────────────────────
