@@ -98,6 +98,10 @@
       <div class="results-header">
         <h2 id="wl-title">My Wishlist</h2>
         <span class="game-subtitle" id="wl-subtitle"></span>
+        <div class="view-controls">
+          <button class="view-btn active" id="wl-btn-grid" onclick="setWlView('grid')" title="Grid">&#x229E;</button>
+          <button class="view-btn"        id="wl-btn-list" onclick="setWlView('list')" title="List">&#9776;</button>
+        </div>
         <div class="wl-sort-bar">
           <span class="wl-sort-label">Sort:</span>
           <button class="wl-sort-btn active" id="wsort-discount" onclick="sortWishlist('discount')">Discount</button>

@@ -17,6 +17,41 @@ var _wlPerPage = 20;
 // Búsqueda en wishlist
 var _wlSearchQuery = '';
 
+// Vista (grid/list) — persiste en localStorage
+var _wlView = 'grid';
+var LS_WL_VIEW_KEY = 'newgamesave_wl_view_v1';
+(function _restoreWlView() {
+  try {
+    var saved = localStorage.getItem(LS_WL_VIEW_KEY);
+    if (saved === 'grid' || saved === 'list') _wlView = saved;
+  } catch(e) {}
+})();
+
+function setWlView(v) {
+  if (v !== 'grid' && v !== 'list') return;
+  _wlView = v;
+  try { localStorage.setItem(LS_WL_VIEW_KEY, v); } catch(e) {}
+
+  var grid = document.getElementById('wl-grid');
+  if (grid) grid.classList.toggle('view-list', v === 'list');
+
+  var btnGrid = document.getElementById('wl-btn-grid');
+  var btnList = document.getElementById('wl-btn-list');
+  if (btnGrid) btnGrid.classList.toggle('active', v === 'grid');
+  if (btnList) btnList.classList.toggle('active', v === 'list');
+}
+
+// Sincronizar UI con el valor restaurado de localStorage en el momento
+// que el DOM esté listo (el script va al final del body, pero los handlers
+// de DOMContentLoaded son la forma estándar de garantizarlo).
+(function _syncWlViewOnLoad() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setWlView(_wlView); });
+  } else {
+    setWlView(_wlView);
+  }
+})();
+
 
 // ── Tab switcher ────────────────────────────────────────────────
 function switchTab(tab) {
