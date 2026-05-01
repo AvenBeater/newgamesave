@@ -54,10 +54,19 @@ STEAM_LANG = {
 }
 
 STORE_NAMES = {
-    "steam": "Steam", "humblestore": "Humble Store", "fanatical": "Fanatical",
-    "gog": "GOG", "epicgames": "Epic Games", "gamebillet": "GameBillet",
-    "wingamestore": "WinGameStore", "greenman": "Green Man Gaming",
-    "indiegala": "IndieGala", "voidu": "Voidu",
+    # Slug usado por el Steam direct fetch (no pasa por ITAD)
+    "steam": "Steam",
+    # IDs numéricos de ITAD (lo que viene en el campo shop.id de los deals)
+    "2":  "AllYouPlay",
+    "13": "DLGamer",
+    "15": "DreamGame",
+    "19": "2game",
+    "24": "GamersGate",
+    "50": "Nuuvem",
+    "65": "JoyBuggy",
+    "70": "Playsum",
+    "75": "Fortuna Digital",
+    "76": "Gamesporium",
 }
 
 STORE_COLORS = {
