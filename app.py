@@ -1,6 +1,8 @@
 # NewGame+Save — MIT License — Copyright (c) 2026 Albert Aguirre (AvenBeater)
 # https://github.com/AvenBeater/newgamesave
 #
+# v2.4.0 - CLP currency, smart locale defaults + persistence, wishlist
+#          list view, 10 nuevas tiendas + fix de colores por tienda
 # v2.3.1 - Fix: cambio de idioma/moneda actualiza tarjetas de wishlist
 # v2.3.0 - Rebrand Gamewise → NewGame+Save (newgamesave.com)
 # v2.2.0 - Rebrand GameDeals → Gamewise + PayPal donate widget + AdSense slot
@@ -41,7 +43,7 @@ def _open_browser():
 # servidor sin display, así que mantenerlo dentro del __main__ guard.
 if __name__ == "__main__":
     print("\n" + "=" * 50)
-    print("  \U0001f3ae  NewGame+Save v2.3.1")
+    print("  \U0001f3ae  NewGame+Save v2.4.0")
     print("=" * 50)
     print("  Abriendo en tu navegador...")
     print("  URL: http://localhost:5000")
