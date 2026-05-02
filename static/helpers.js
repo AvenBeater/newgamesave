@@ -104,6 +104,21 @@ function fmtPrice(n){
   return c.symbol + Number(n).toLocaleString(c.locale,{minimumFractionDigits:0,maximumFractionDigits:c.dec});
 }
 
+function displayPrice(n){
+  var needsCode = ["COP", "MXN", "ARS", "CLP"].indexOf(currentCurrency) !== -1;
+  return fmtPrice(n) + (needsCode ? " " + currentCurrency : "");
+}
+
+function rateText(rate){
+  if(currentCurrency === "USD") return t("rateUsdBase") + " \u00b7 " + t("updated");
+  return "USD \u2192 " + currentCurrency + ": " + fmtPrice(rate) + " \u00b7 " + t("updated");
+}
+
+function rateStatusText(rate){
+  if(currentCurrency === "USD") return t("rateUsdBase") + " &middot; " + t("updated");
+  return t("rateLabel") + " USD/" + currentCurrency + ": <span>" + fmtPrice(rate) + "</span> &middot; " + t("updated");
+}
+
 function esc(s){
   return String(s)
     .replace(/&/g,"&amp;").replace(/'/g,"&#39;")
@@ -162,6 +177,19 @@ function applyLang(){
   var donFab = document.getElementById("donate-fab");
   if(donFab) donFab.setAttribute("aria-label", t("donateTitle"));
 
+  [
+    ["btn-grid", "viewGrid"],
+    ["btn-list", "viewList"],
+    ["btn-table", "viewTable"],
+    ["wl-btn-grid", "viewGrid"],
+    ["wl-btn-list", "viewList"],
+  ].forEach(function(pair) {
+    var el = document.getElementById(pair[0]);
+    if (!el) return;
+    el.title = t(pair[1]);
+    el.setAttribute("aria-label", t(pair[1]));
+  });
+
   if(lastData) renderResults(lastData, lastGameName);
 }
 
@@ -175,8 +203,7 @@ async function loadRate(){
     var d=await r.json();
     if(d.rate&&d.rate>0){
       currentRate=d.rate;
-      document.getElementById("rate-text").textContent=
-        "USD \u2192 "+currentCurrency+": "+fmtPrice(d.rate)+" \u00b7 "+t("updated");
+      document.getElementById("rate-text").textContent=rateText(d.rate);
     }
   }catch(e){
     document.getElementById("rate-text").textContent=currentCurrency+" (est.)";
