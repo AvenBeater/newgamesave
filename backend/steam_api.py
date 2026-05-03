@@ -198,22 +198,23 @@ def resolve_steam_id(steam_input):
     if s.isdigit() and len(s) >= 15:
         return s, None
 
+    # Resolver vanity URL vía feed XML público del perfil (no requiere API key)
     try:
         r = requests.get(
-            "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/",
-            params={"vanityurl": s},
+            f"https://steamcommunity.com/id/{requests.utils.quote(s)}/",
+            params={"xml": 1},
+            headers=STEAM_HEADERS,
             timeout=8,
         )
         if r.status_code == 200:
-            resp = r.json().get("response", {})
-            if resp.get("success") == 1:
-                return resp["steamid"], None
-            else:
+            m = re.search(r"<steamID64>(\d{15,})</steamID64>", r.text)
+            if m:
+                return m.group(1), None
+            if "<error>" in r.text.lower():
                 return None, f"No se encontró ningún perfil con el nombre '{s}'. Prueba con tu SteamID64 numérico."
+        return None, f"No se pudo resolver '{s}' (HTTP {r.status_code}). Prueba con tu SteamID64 numérico."
     except Exception as e:
         return None, f"Error al resolver vanity URL: {e}"
-
-    return None, f"No se pudo interpretar '{s}' como Steam ID o nombre de perfil."
 
 
 # ── Wishlist ─────────────────────────────────────────────────────────────────
