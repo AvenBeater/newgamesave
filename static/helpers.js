@@ -253,6 +253,8 @@ function clearWishlistSearch(){
   document.getElementById("wl-results").style.display="none";
   document.getElementById("wl-empty").style.display="";
   document.getElementById("wl-empty").querySelector("p").textContent=t("wlEmpty");
+  var badge=document.getElementById("wl-deal-badge");
+  if(badge){ badge.textContent=""; badge.classList.add("zero"); }
   cancelHltb();
   cancelReviews();
   cancelMetacritic();
