@@ -239,7 +239,6 @@ function clearSearch(){
 
   hideAll();
   document.getElementById("empty").style.display="block";
-  try{ localStorage.clear(); }catch(e){}
 }
 
 function updateClearBtn(){
@@ -258,8 +257,25 @@ function clearWishlistSearch(){
   cancelHltb();
   cancelReviews();
   cancelMetacritic();
+  _clearLocalStorageExcept(["newgamesave_dob_v1"]);
+}
 
-  try{ localStorage.clear(); }catch(e){}
+// Limpieza de localStorage que preserva las claves listadas. Reemplaza
+// el `localStorage.clear()` original (que nukeaba TODO) para que ciertas
+// preferencias persistentes — como la fecha de nacimiento verificada del
+// age-gate — sobrevivan al click en la X.
+function _clearLocalStorageExcept(preserveKeys){
+  try {
+    var saved = {};
+    (preserveKeys || []).forEach(function(k){
+      var v = localStorage.getItem(k);
+      if(v !== null) saved[k] = v;
+    });
+    localStorage.clear();
+    Object.keys(saved).forEach(function(k){
+      localStorage.setItem(k, saved[k]);
+    });
+  } catch(e){}
 }
 
 function updateWlClearBtn(){
