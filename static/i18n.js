@@ -84,7 +84,17 @@ const I18N = {
     genres:"G\u00e9neros",
     release:"Lanzamiento",
     categories:"Categor\u00edas",
-    appLoading:"Cargando..."
+    appLoading:"Cargando...",
+    // Age gate
+    ageModalTitle:"Verificaci\u00f3n de edad",
+    ageModalMsg:"Este contenido est\u00e1 restringido a mayores de 18 a\u00f1os. Ingresa tu fecha de nacimiento para continuar.",
+    ageModalConfirm:"Confirmar",
+    ageModalCancel:"Cancelar",
+    ageModalInvalid:"Por favor, ingresa una fecha v\u00e1lida.",
+    ageModalUnderage:"Debes ser mayor de 18 a\u00f1os para ver este contenido.",
+    dobDay:"D\u00eda",
+    dobMonth:"Mes",
+    dobYear:"A\u00f1o"
   },
   en:{
     subtitle:"Compare game prices in real time",
@@ -163,7 +173,17 @@ const I18N = {
     genres:"Genres",
     release:"Release",
     categories:"Categories",
-    appLoading:"Loading..."
+    appLoading:"Loading...",
+    // Age gate
+    ageModalTitle:"Age verification",
+    ageModalMsg:"This content is restricted to users 18 and older. Enter your date of birth to continue.",
+    ageModalConfirm:"Confirm",
+    ageModalCancel:"Cancel",
+    ageModalInvalid:"Please enter a valid date.",
+    ageModalUnderage:"You must be 18 or older to view this content.",
+    dobDay:"Day",
+    dobMonth:"Month",
+    dobYear:"Year"
   },
   pt:{
     subtitle:"Compare pre\u00e7os de jogos em tempo real",
@@ -242,7 +262,17 @@ const I18N = {
     genres:"G\u00eaneros",
     release:"Lan\u00e7amento",
     categories:"Categorias",
-    appLoading:"Carregando..."
+    appLoading:"Carregando...",
+    // Age gate
+    ageModalTitle:"Verifica\u00e7\u00e3o de idade",
+    ageModalMsg:"Este conte\u00fado \u00e9 restrito a maiores de 18 anos. Informe sua data de nascimento para continuar.",
+    ageModalConfirm:"Confirmar",
+    ageModalCancel:"Cancelar",
+    ageModalInvalid:"Por favor, insira uma data v\u00e1lida.",
+    ageModalUnderage:"Voc\u00ea precisa ter 18 anos ou mais para ver este conte\u00fado.",
+    dobDay:"Dia",
+    dobMonth:"M\u00eas",
+    dobYear:"Ano"
   },
   fr:{
     subtitle:"Comparez les prix des jeux en temps r\u00e9el",
@@ -321,7 +351,17 @@ const I18N = {
     genres:"Genres",
     release:"Sortie",
     categories:"Cat\u00e9gories",
-    appLoading:"Chargement..."
+    appLoading:"Chargement...",
+    // Age gate
+    ageModalTitle:"V\u00e9rification d'\u00e2ge",
+    ageModalMsg:"Ce contenu est r\u00e9serv\u00e9 aux personnes de 18 ans et plus. Saisissez votre date de naissance pour continuer.",
+    ageModalConfirm:"Confirmer",
+    ageModalCancel:"Annuler",
+    ageModalInvalid:"Veuillez entrer une date valide.",
+    ageModalUnderage:"Vous devez avoir 18 ans ou plus pour voir ce contenu.",
+    dobDay:"Jour",
+    dobMonth:"Mois",
+    dobYear:"Ann\u00e9e"
   },
 };
 const CURR = {

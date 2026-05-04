@@ -366,3 +366,28 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
   .toast-container{top:10px;right:10px;left:10px;max-width:none;}
   .toast{min-width:0;width:100%;}
 }
+
+/* ── AGE-VERIFICATION MODAL ─────────────────────────── */
+.age-modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s;}
+.age-modal-overlay.visible{opacity:1;visibility:visible;transition:opacity .25s ease,visibility 0s linear 0s;}
+.age-modal{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 26px 22px;max-width:460px;width:100%;box-shadow:0 16px 60px rgba(0,0,0,.6);transform:translateY(10px);transition:transform .25s ease;font-family:'Space Mono',monospace;}
+.age-modal-overlay.visible .age-modal{transform:translateY(0);}
+.age-modal-close{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:24px;line-height:1;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;}
+.age-modal-close:hover{color:var(--text);background:var(--surface2);}
+.age-modal-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text);margin:0 0 12px;line-height:1.2;}
+.age-modal-msg{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 22px;}
+.dob-picker{display:flex;gap:10px;margin-bottom:24px;}
+.dob-select{flex:1;min-width:0;}
+.dob-select-year{flex:1.4;}
+.age-modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+.age-modal-btn{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;padding:10px 22px;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid var(--border);}
+.age-modal-btn-cancel{background:transparent;color:var(--muted);}
+.age-modal-btn-cancel:hover{color:var(--text);background:var(--surface2);}
+.age-modal-btn-confirm{background:var(--accent);color:#000;border-color:var(--accent);}
+.age-modal-btn-confirm:hover{background:#00e878;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,255,135,.3);}
+@media(max-width:540px){
+  .age-modal{padding:24px 20px 18px;}
+  .dob-picker{flex-direction:column;}
+  .age-modal-actions{flex-direction:column-reverse;}
+  .age-modal-btn{width:100%;}
+}
