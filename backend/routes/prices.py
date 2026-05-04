@@ -77,4 +77,5 @@ def api_prices():
         "currency":      currency,
         "localizedName": localized_name,
         "steamBundles":  steam_bundles,
+        "mature":        details.get("mature", False),
     })
