@@ -173,11 +173,11 @@ function updateDurationBtn() {
     btn.disabled = false;
     btn.title = '';
     var isDur = (_wlSortMode === 'duration-asc' || _wlSortMode === 'duration-desc');
-    if (!isDur) btn.textContent = t('sortDuration');
+    if (!isDur) btn.innerHTML = '<span class="pa-icon pa-icon-clock"></span> ' + esc(t('sortDuration'));
   } else {
     btn.disabled = true;
     var pct = _wlHltbTotal > 0 ? Math.round((_wlHltbLoaded / _wlHltbTotal) * 100) : 0;
-    btn.textContent = t('sortDuration') + ' (' + pct + '%)';
+    btn.innerHTML = '<span class="pa-icon pa-icon-clock"></span> ' + esc(t('sortDuration')) + ' (' + pct + '%)';
     btn.title = t('sortDurationLoading');
   }
   _updateHltbProgress();

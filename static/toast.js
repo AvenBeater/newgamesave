@@ -31,10 +31,9 @@
     var t = document.createElement("div");
     t.className = "toast toast-" + type;
 
-    var iconChar = type === "error" ? "⚠" : (type === "success" ? "✓" : "ℹ");
+    var iconClass = type === "error" ? "pa-icon-warning" : (type === "success" ? "pa-icon-check" : "pa-icon-info");
     var iconEl = document.createElement("span");
-    iconEl.className = "toast-icon";
-    iconEl.textContent = iconChar;
+    iconEl.className = "toast-icon pa-icon " + iconClass;
     iconEl.setAttribute("aria-hidden", "true");
 
     var msg = document.createElement("span");
@@ -45,7 +44,7 @@
     close.className = "toast-close";
     close.setAttribute("aria-label", "Close");
     close.type = "button";
-    close.textContent = "×";
+    close.innerHTML = '<span class="pa-icon pa-icon-cancel"></span>';
     close.onclick = function(){ dismissToast(t); };
 
     t.appendChild(iconEl);
