@@ -411,6 +411,8 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .pa-icon-warning{--ico:url("/static/assets/icons/warning-diamond.svg");}
 .pa-icon-check{--ico:url("/static/assets/icons/check.svg");}
 .pa-icon-info{--ico:url("/static/assets/icons/info-box.svg");}
+/* cancel.svg es custom (X plana). Pixelarticons no tiene una X simple — su `cancel`
+   original es un rectángulo con X dentro, que no encajaba como botón close. */
 .pa-icon-cancel{--ico:url("/static/assets/icons/cancel.svg");}
 .pa-icon-play{--ico:url("/static/assets/icons/play.svg");}
 /* Tamaños usados en contextos específicos. Por defecto 1em (sigue al texto). */
