@@ -106,7 +106,7 @@
     closeBtn.type = "button";
     closeBtn.className = "age-modal-close";
     closeBtn.setAttribute("aria-label", "Close");
-    closeBtn.textContent = "×";
+    closeBtn.innerHTML = '<span class="pa-icon pa-icon-cancel"></span>';
     closeBtn.onclick = cancelFlow;
 
     var title = document.createElement("h2");
