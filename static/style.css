@@ -358,10 +358,7 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .toast-close{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:color .15s,background .15s;flex-shrink:0;}
 .toast-close:hover{color:var(--text);background:var(--surface2);}
 .toast-error{border-color:rgba(255,107,107,.5);}
-.toast-error .toast-icon{color:var(--accent2);}
 .toast-success{border-color:rgba(0,255,135,.5);}
-.toast-success .toast-icon{color:var(--accent);}
-.toast-info .toast-icon{color:var(--muted);}
 @media(max-width:540px){
   .toast-container{top:10px;right:10px;left:10px;max-width:none;}
   .toast{min-width:0;width:100%;}
@@ -391,3 +388,36 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
   .age-modal-actions{flex-direction:column-reverse;}
   .age-modal-btn{width:100%;}
 }
+
+/* ── PIXEL ART ICONS (Pixelarticons, MIT) ──────────── */
+/* Default: hereda el color del texto del padre via currentColor.
+   Para forzar otro color, override el background-color en el contexto. */
+.pa-icon{display:inline-block;width:1em;height:1em;background-color:currentColor;mask:var(--ico) no-repeat center/contain;-webkit-mask:var(--ico) no-repeat center/contain;vertical-align:-.15em;flex-shrink:0;}
+.pa-icon-search{--ico:url("/static/assets/icons/search.svg");}
+.pa-icon-heart{--ico:url("/static/assets/icons/heart.svg");}
+.pa-icon-coffee{--ico:url("/static/assets/icons/coffee.svg");}
+.pa-icon-grid{--ico:url("/static/assets/icons/grid-2x2-2.svg");}
+.pa-icon-list{--ico:url("/static/assets/icons/list-box.svg");}
+.pa-icon-table{--ico:url("/static/assets/icons/grid-3x3.svg");}
+.pa-icon-clock{--ico:url("/static/assets/icons/clock.svg");}
+.pa-icon-sparkles{--ico:url("/static/assets/icons/sparkles.svg");}
+.pa-icon-fire{--ico:url("/static/assets/icons/fire.svg");}
+.pa-icon-gift{--ico:url("/static/assets/icons/gift.svg");}
+.pa-icon-gamepad{--ico:url("/static/assets/icons/gamepad.svg");}
+.pa-icon-arrow-up{--ico:url("/static/assets/icons/arrow-up.svg");}
+.pa-icon-arrow-right{--ico:url("/static/assets/icons/arrow-right.svg");}
+.pa-icon-arrow-left{--ico:url("/static/assets/icons/arrow-left.svg");}
+.pa-icon-external{--ico:url("/static/assets/icons/external-link.svg");}
+.pa-icon-warning{--ico:url("/static/assets/icons/warning-diamond.svg");}
+.pa-icon-check{--ico:url("/static/assets/icons/check.svg");}
+.pa-icon-info{--ico:url("/static/assets/icons/info-box.svg");}
+.pa-icon-cancel{--ico:url("/static/assets/icons/cancel.svg");}
+.pa-icon-play{--ico:url("/static/assets/icons/play.svg");}
+/* Tamaños usados en contextos específicos. Por defecto 1em (sigue al texto). */
+.pa-icon-lg{width:1.5em;height:1.5em;}
+.pa-icon-2x{width:2em;height:2em;}
+.pa-icon-3x{width:3em;height:3em;}
+/* Iconos con color semántico independiente del texto del padre. */
+.toast-error .pa-icon{background-color:var(--accent2);}
+.toast-success .pa-icon{background-color:var(--accent);}
+.toast-info .pa-icon{background-color:var(--muted);}

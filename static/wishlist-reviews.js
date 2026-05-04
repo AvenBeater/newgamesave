@@ -182,11 +182,11 @@ function updateReviewsBtn() {
     btn.disabled = false;
     btn.title = '';
     var isRev = (_wlSortMode === 'reviews-desc' || _wlSortMode === 'reviews-asc');
-    if (!isRev) btn.textContent = t('sortSteamReviews');
+    if (!isRev) btn.innerHTML = '<span class="pa-icon pa-icon-sparkles"></span> ' + esc(t('sortSteamReviews'));
   } else {
     btn.disabled = true;
     var pct = _wlReviewsTotal > 0 ? Math.round((_wlReviewsLoaded / _wlReviewsTotal) * 100) : 0;
-    btn.textContent = t('sortSteamReviews') + ' (' + pct + '%)';
+    btn.innerHTML = '<span class="pa-icon pa-icon-sparkles"></span> ' + esc(t('sortSteamReviews')) + ' (' + pct + '%)';
     btn.title = t('sortReviewsLoading');
   }
   _updateRevProgress();
