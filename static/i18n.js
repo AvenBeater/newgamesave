@@ -1,6 +1,6 @@
 const I18N = {
   es:{
-    subtitle:"Compara precios de juegos en tiempo real",
+    subtitle:"Compara precios de juegos en tiempo real de diferentes tiendas",
     searchBtn:"Buscar precios",
     searchPH:"Busca un juego... (ej: Cyberpunk, Elden Ring)",
     loading:"Consultando tiendas...",
@@ -97,7 +97,7 @@ const I18N = {
     dobYear:"A\u00f1o"
   },
   en:{
-    subtitle:"Compare game prices in real time",
+    subtitle:"Compare game prices in real time across different stores",
     searchBtn:"Search prices",
     searchPH:"Search a game... (e.g. Cyberpunk, Elden Ring)",
     loading:"Checking stores...",
@@ -186,7 +186,7 @@ const I18N = {
     dobYear:"Year"
   },
   pt:{
-    subtitle:"Compare pre\u00e7os de jogos em tempo real",
+    subtitle:"Compare pre\u00e7os de jogos em tempo real em v\u00e1rias lojas",
     searchBtn:"Buscar pre\u00e7os",
     searchPH:"Busque um jogo... (ex: Cyberpunk, Elden Ring)",
     loading:"Consultando lojas...",
@@ -275,7 +275,7 @@ const I18N = {
     dobYear:"Ano"
   },
   fr:{
-    subtitle:"Comparez les prix des jeux en temps r\u00e9el",
+    subtitle:"Comparez les prix des jeux en temps r\u00e9el sur diff\u00e9rentes boutiques",
     searchBtn:"Chercher les prix",
     searchPH:"Cherchez un jeu... (ex: Cyberpunk, Elden Ring)",
     loading:"Consultation des boutiques...",
