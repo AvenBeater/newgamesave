@@ -6,6 +6,7 @@ var _mediaIdx   = 0;
 var _mediaViewerHls = null;
 var _mediaTheaterKeyHandler = null;
 var _mediaTheaterHls = null;
+var _mediaTheaterReturnFocus = null;
 var _mediaFullscreenEventsBound = false;
 
 function _isVideoMedia(item){
@@ -299,7 +300,55 @@ function _buildCustomVideoPlayer(item, options){
   vid.addEventListener('volumechange', updateVolumeState);
   wrap.addEventListener('mousemove', showControls);
   wrap.addEventListener('touchstart', showControls, {passive: true});
-  wrap.addEventListener('keydown', showControls);
+
+  // Atajos de teclado nativos (compensa la perdida del atributo `controls`).
+  // Ignoramos cuando el foco esta en un boton o slider para no pisar su comportamiento nativo.
+  wrap.tabIndex = 0;
+  wrap.addEventListener('keydown', function(e){
+    showControls();
+    var tag = (e.target && e.target.tagName ? e.target.tagName : '').toUpperCase();
+    if(tag === 'BUTTON' || tag === 'INPUT') return;
+    var handled = true;
+    switch(e.key){
+      case ' ':
+      case 'k':
+      case 'K':
+        if(vid.paused) vid.play().catch(function(){}); else vid.pause();
+        break;
+      case 'ArrowLeft':
+        vid.currentTime = Math.max(0, (vid.currentTime || 0) - 5);
+        break;
+      case 'ArrowRight':
+        vid.currentTime = Math.min(vid.duration || 0, (vid.currentTime || 0) + 5);
+        break;
+      case 'ArrowUp':
+        vid.volume = Math.min(1, (vid.volume || 0) + 0.1);
+        vid.muted = false;
+        updateVolumeState();
+        break;
+      case 'ArrowDown':
+        vid.volume = Math.max(0, (vid.volume || 0) - 0.1);
+        updateVolumeState();
+        break;
+      case 'm':
+      case 'M':
+        vid.muted = !vid.muted;
+        updateVolumeState();
+        break;
+      case 'f':
+      case 'F':
+        var fsTarget = wrap.closest('.media-theater') || wrap.closest('.media-viewer') || wrap;
+        _toggleFullscreen(fsTarget);
+        break;
+      default:
+        handled = false;
+    }
+    if(handled){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+
   controls.addEventListener('mouseenter', function(){ clearTimeout(hideControlsTimer); });
   controls.addEventListener('mouseleave', scheduleControlsHide);
   controls.addEventListener('focusin', function(){ clearTimeout(hideControlsTimer); wrap.classList.remove('controls-hidden'); });
@@ -439,6 +488,9 @@ function openMediaTheater(idx){
 
   closeMediaTheater();
 
+  // Guardar el elemento que tenia foco antes de abrir, para restaurarlo al cerrar.
+  _mediaTheaterReturnFocus = document.activeElement;
+
   var overlay = document.createElement('div');
   overlay.className = 'media-theater';
   overlay.id = 'media-theater';
@@ -447,6 +499,7 @@ function openMediaTheater(idx){
 
   var bar = document.createElement('div');
   bar.className = 'media-theater-bar';
+  bar.addEventListener('click', function(e){ e.stopPropagation(); });
   var title = document.createElement('div');
   title.className = 'media-theater-title';
   var gameTitle = document.getElementById('game-title');
@@ -461,6 +514,7 @@ function openMediaTheater(idx){
 
   var footer = document.createElement('div');
   footer.className = 'media-theater-footer';
+  footer.addEventListener('click', function(e){ e.stopPropagation(); });
   overlay.appendChild(footer);
 
   var closeBtn = document.createElement('button');
@@ -550,9 +604,33 @@ function openMediaTheater(idx){
   overlay.addEventListener('click', closeMediaTheater);
 
   _mediaTheaterKeyHandler = function(e){
-    if(e.key === 'Escape') closeMediaTheater();
-    if(e.key === 'ArrowLeft') moveMedia(-1);
-    if(e.key === 'ArrowRight') moveMedia(1);
+    if(e.key === 'Escape') { closeMediaTheater(); return; }
+
+    // ArrowLeft/Right navegan entre media, excepto si el foco esta dentro
+    // del video player (donde esas teclas hacen seek o ajustan slider).
+    var active = document.activeElement;
+    var inVideoPlayer = active && active.closest && active.closest('.media-video-player');
+    if(!inVideoPlayer){
+      if(e.key === 'ArrowLeft') { moveMedia(-1); return; }
+      if(e.key === 'ArrowRight') { moveMedia(1); return; }
+    }
+
+    // Focus trap: mantener el foco dentro del overlay con Tab.
+    if(e.key === 'Tab'){
+      var focusables = overlay.querySelectorAll('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])');
+      var visible = [];
+      focusables.forEach(function(el){ if(el.offsetParent !== null) visible.push(el); });
+      if(!visible.length) return;
+      var first = visible[0];
+      var last = visible[visible.length - 1];
+      if(e.shiftKey && (active === first || !overlay.contains(active))){
+        e.preventDefault();
+        last.focus();
+      } else if(!e.shiftKey && (active === last || !overlay.contains(active))){
+        e.preventDefault();
+        first.focus();
+      }
+    }
   };
   document.addEventListener('keydown', _mediaTheaterKeyHandler);
 
@@ -572,6 +650,11 @@ function closeMediaTheater(){
     document.removeEventListener('keydown', _mediaTheaterKeyHandler);
     _mediaTheaterKeyHandler = null;
   }
+  // Restaurar foco al elemento que abrio el theater (a11y).
+  if(_mediaTheaterReturnFocus && typeof _mediaTheaterReturnFocus.focus === 'function'){
+    try { _mediaTheaterReturnFocus.focus(); } catch(e) {}
+  }
+  _mediaTheaterReturnFocus = null;
 }
 
 // ── Render panel completo ───────────────────────────────────────
