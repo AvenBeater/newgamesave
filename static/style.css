@@ -161,7 +161,14 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .media-theater-next{right:18px;}
 .media-theater-prev::before{transform:rotate(-135deg);}
 .media-theater-next::before{transform:rotate(45deg);}
-@media(max-width:900px){.game-card-body{flex-direction:column}.game-info-panel{width:100%;max-height:none;border-right:none;border-bottom:1px solid rgba(0,255,135,.1)}.price-main{font-size:1.8rem}}
+@media(max-width:900px){
+  .game-card-body{flex-direction:column;height:auto;}
+  .game-info-panel{width:100%;height:auto;max-height:none;border-right:none;border-bottom:1px solid rgba(0,255,135,.1);overflow-y:visible;}
+  .media-panel{border-radius:0 0 20px 20px;}
+  .media-viewer{aspect-ratio:16/9;flex:none;max-height:60vh;}
+  .media-viewer img,.media-viewer video,.media-video-el{object-fit:contain;}
+  .price-main{font-size:1.8rem;}
+}
 .status{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:12px;color:var(--muted);display:none;}
 .status span{color:var(--accent);}
 .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:40px;}
