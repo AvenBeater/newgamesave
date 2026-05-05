@@ -787,6 +787,7 @@ function buildWishlistCard(game, animIdx) {
 
   var priceEl = document.createElement('div');
   priceEl.id = 'wlprice-' + game.appid;
+  priceEl.className = 'wl-price-content';
   priceEl.appendChild(buildPriceContent(game, priceData));
   body.appendChild(priceEl);
 
