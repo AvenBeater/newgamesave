@@ -2,10 +2,17 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,135,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,135,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
-.container{max-width:1100px;margin:0 auto;padding:40px 24px;position:relative;z-index:1;}
-header{margin-bottom:32px;text-align:center;}
-h1{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,6vw,70px);font-weight:800;line-height:1;letter-spacing:-2px;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;transition:filter .3s ease;}
-h1:hover{filter:drop-shadow(0 0 20px rgba(0,255,135,.3));}
+.container{max-width:1100px;margin:0 auto;padding:0 24px 40px;position:relative;z-index:1;}
+header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
+.site-logo{display:block;width:min(500px,90vw);height:auto;margin:var(--logo-h) auto;transition:filter .3s ease;}
+.site-logo:hover{filter:drop-shadow(0 0 40px rgba(0,255,135,.3));}
+/* Animación de neón parpadeante — preservada para iteración futura.
+   Para activarla, añadir `animation:neon-flicker 4s linear infinite;` a .site-logo. */
+@keyframes neon-flicker{
+  0%,6%,8%,31%,33%,35%,60%,62%,80%,82%,100%{filter:none;opacity:1;}
+  7%,32%,34%,81%{filter:drop-shadow(0 0 40px rgba(0,255,135,.345));opacity:1;}
+  61%{filter:drop-shadow(0 0 20px rgba(0,255,135,.21));opacity:.9;}
+}
 .subtitle{color:var(--muted);font-size:13px;letter-spacing:1px;}
 .rate-badge{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:6px 16px;font-size:12px;color:var(--muted);}
 .rate-badge .dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 2s infinite;}
@@ -316,6 +323,7 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .wl-grid.view-list .wl-mc-badge{left:4px;}
 
 @media(max-width:540px){
+  .site-logo{width:min(250px,90vw);}
   .wl-grid.view-list .wl-card-cover,
   .wl-grid.view-list .wl-cover-placeholder{width:96px;}
   .wl-grid.view-list .wl-card-body{padding:8px 10px;gap:8px;}
@@ -405,3 +413,79 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
   text-transform:uppercase;letter-spacing:1px;
 }
 .ad-slot-placeholder{opacity:.5;}
+
+/* ── TOAST FEEDBACK ──────────────────────────────────── */
+.toast-container{position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:calc(100vw - 40px);}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:280px;max-width:420px;opacity:0;transform:translateX(20px);transition:opacity .25s ease,transform .25s ease;font-family:'Space Mono',monospace;}
+.toast-visible{opacity:1;transform:translateX(0);}
+.toast-leaving{opacity:0;transform:translateX(20px);}
+.toast-icon{font-size:16px;flex-shrink:0;line-height:1;}
+.toast-msg{flex:1;line-height:1.4;}
+.toast-close{background:none;border:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer;padding:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:color .15s,background .15s;flex-shrink:0;}
+.toast-close:hover{color:var(--text);background:var(--surface2);}
+.toast-error{border-color:rgba(255,107,107,.5);}
+.toast-success{border-color:rgba(0,255,135,.5);}
+@media(max-width:540px){
+  .toast-container{top:10px;right:10px;left:10px;max-width:none;}
+  .toast{min-width:0;width:100%;}
+}
+
+/* ── AGE-VERIFICATION MODAL ─────────────────────────── */
+.age-modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .25s ease,visibility 0s linear .25s;}
+.age-modal-overlay.visible{opacity:1;visibility:visible;transition:opacity .25s ease,visibility 0s linear 0s;}
+.age-modal{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 26px 22px;max-width:460px;width:100%;box-shadow:0 16px 60px rgba(0,0,0,.6);transform:translateY(10px);transition:transform .25s ease;font-family:'Space Mono',monospace;}
+.age-modal-overlay.visible .age-modal{transform:translateY(0);}
+.age-modal-close{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:24px;line-height:1;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:color .15s,background .15s;}
+.age-modal-close:hover{color:var(--text);background:var(--surface2);}
+.age-modal-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text);margin:0 0 12px;line-height:1.2;}
+.age-modal-msg{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 22px;text-align:center;}
+.dob-picker{display:flex;gap:10px;margin-bottom:24px;}
+.dob-select{flex:1;min-width:0;}
+.dob-select-year{flex:1.4;}
+.age-modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+.age-modal-btn{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;padding:10px 22px;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid var(--border);}
+.age-modal-btn-cancel{background:transparent;color:var(--muted);}
+.age-modal-btn-cancel:hover{color:var(--text);background:var(--surface2);}
+.age-modal-btn-confirm{background:var(--accent);color:#000;border-color:var(--accent);}
+.age-modal-btn-confirm:hover{background:#00e878;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,255,135,.3);}
+@media(max-width:540px){
+  .age-modal{padding:24px 20px 18px;}
+  .dob-picker{flex-direction:column;}
+  .age-modal-actions{flex-direction:column-reverse;}
+  .age-modal-btn{width:100%;}
+}
+
+/* ── PIXEL ART ICONS (Pixelarticons, MIT) ──────────── */
+/* Default: hereda el color del texto del padre via currentColor.
+   Para forzar otro color, override el background-color en el contexto. */
+.pa-icon{display:inline-block;width:1em;height:1em;background-color:currentColor;mask:var(--ico) no-repeat center/contain;-webkit-mask:var(--ico) no-repeat center/contain;vertical-align:-.15em;flex-shrink:0;}
+.pa-icon-search{--ico:url("/static/assets/icons/search.svg");}
+.pa-icon-heart{--ico:url("/static/assets/icons/heart.svg");}
+.pa-icon-coffee{--ico:url("/static/assets/icons/coffee.svg");}
+.pa-icon-grid{--ico:url("/static/assets/icons/grid-2x2-2.svg");}
+.pa-icon-list{--ico:url("/static/assets/icons/list-box.svg");}
+.pa-icon-table{--ico:url("/static/assets/icons/grid-3x3.svg");}
+.pa-icon-clock{--ico:url("/static/assets/icons/clock.svg");}
+.pa-icon-sparkles{--ico:url("/static/assets/icons/sparkles.svg");}
+.pa-icon-fire{--ico:url("/static/assets/icons/fire.svg");}
+.pa-icon-gift{--ico:url("/static/assets/icons/gift.svg");}
+.pa-icon-gamepad{--ico:url("/static/assets/icons/gamepad.svg");}
+.pa-icon-arrow-up{--ico:url("/static/assets/icons/arrow-up.svg");}
+.pa-icon-arrow-right{--ico:url("/static/assets/icons/arrow-right.svg");}
+.pa-icon-arrow-left{--ico:url("/static/assets/icons/arrow-left.svg");}
+.pa-icon-external{--ico:url("/static/assets/icons/external-link.svg");}
+.pa-icon-warning{--ico:url("/static/assets/icons/warning-diamond.svg");}
+.pa-icon-check{--ico:url("/static/assets/icons/check.svg");}
+.pa-icon-info{--ico:url("/static/assets/icons/info-box.svg");}
+/* cancel.svg es custom (X plana). Pixelarticons no tiene una X simple — su `cancel`
+   original es un rectángulo con X dentro, que no encajaba como botón close. */
+.pa-icon-cancel{--ico:url("/static/assets/icons/cancel.svg");}
+.pa-icon-play{--ico:url("/static/assets/icons/play.svg");}
+/* Tamaños usados en contextos específicos. Por defecto 1em (sigue al texto). */
+.pa-icon-lg{width:1.5em;height:1.5em;}
+.pa-icon-2x{width:2em;height:2em;}
+.pa-icon-3x{width:3em;height:3em;}
+/* Iconos con color semántico independiente del texto del padre. */
+.toast-error .pa-icon{background-color:var(--accent2);}
+.toast-success .pa-icon{background-color:var(--accent);}
+.toast-info .pa-icon{background-color:var(--muted);}

@@ -339,7 +339,7 @@ function _buildViewerContent(viewer, item){
     ov.id = 'media-overlay';
     var btn = document.createElement('div');
     btn.className = 'media-play-btn';
-    btn.innerHTML = '&#9654;';
+    btn.innerHTML = '<span class="pa-icon pa-icon-play"></span>';
     ov.appendChild(btn);
     var videoItem = item;
     ov.addEventListener('click', function(){
@@ -608,7 +608,7 @@ function renderMediaPanel(media){
       }
       var pi = document.createElement('div');
       pi.className = 'media-thumb-play';
-      pi.innerHTML = '&#9654;';
+      pi.innerHTML = '<span class="pa-icon pa-icon-play"></span>';
       thumb.appendChild(pi);
     } else {
       var img2 = document.createElement('img');

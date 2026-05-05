@@ -198,22 +198,23 @@ def resolve_steam_id(steam_input):
     if s.isdigit() and len(s) >= 15:
         return s, None
 
+    # Resolver vanity URL vía feed XML público del perfil (no requiere API key)
     try:
         r = requests.get(
-            "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/",
-            params={"vanityurl": s},
+            f"https://steamcommunity.com/id/{requests.utils.quote(s)}/",
+            params={"xml": 1},
+            headers=STEAM_HEADERS,
             timeout=8,
         )
         if r.status_code == 200:
-            resp = r.json().get("response", {})
-            if resp.get("success") == 1:
-                return resp["steamid"], None
-            else:
+            m = re.search(r"<steamID64>(\d{15,})</steamID64>", r.text)
+            if m:
+                return m.group(1), None
+            if "<error>" in r.text.lower():
                 return None, f"No se encontró ningún perfil con el nombre '{s}'. Prueba con tu SteamID64 numérico."
+        return None, f"No se pudo resolver '{s}' (HTTP {r.status_code}). Prueba con tu SteamID64 numérico."
     except Exception as e:
         return None, f"Error al resolver vanity URL: {e}"
-
-    return None, f"No se pudo interpretar '{s}' como Steam ID o nombre de perfil."
 
 
 # ── Wishlist ─────────────────────────────────────────────────────────────────
@@ -525,17 +526,29 @@ def snap_steam_ratio(ratio):
 
 # ── appdetails completo (media + game info) ─────────────────────────────────
 
+# IDs de Steam content_descriptors que clasifican contenido sexual/desnudez.
+# Usamos esto en vez de `required_age` para no cazar juegos violentos (CoD, GTA)
+# que tienen ESRB Mature 17+ pero no contenido adulto.
+#  1 = Some Nudity or Sexual Content
+#  3 = Adult Only Sexual Content
+#  4 = Frequent Nudity or Sexual Content
+# Excluidos a propósito: 2 (violencia/gore) y 5 (general mature, ambiguo).
+_ADULT_DESCRIPTOR_IDS = {1, 3, 4}
+
+
 def get_appdetails_full(appid, lang="es"):
     """
-    Pide /api/appdetails (sin filtros) y extrae media + game_info + nombre localizado.
+    Pide /api/appdetails (sin filtros) y extrae media + game_info + nombre localizado
+    + flag `mature` (contenido adulto sexual/desnudez).
     Devuelve siempre un dict; si falla, los campos quedan vacíos.
     """
     media          = []
     game_info      = {}
     localized_name = ""
+    mature         = False
 
     if not appid:
-        return {"media": media, "gameInfo": game_info, "localizedName": localized_name}
+        return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
 
     steam_lang = STEAM_LANG.get(lang, "english")
     try:
@@ -544,11 +557,11 @@ def get_appdetails_full(appid, lang="es"):
             timeout=8,
         )
         if md.status_code != 200:
-            return {"media": media, "gameInfo": game_info, "localizedName": localized_name}
+            return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
 
         md_data = md.json().get(str(appid), {})
         if not (isinstance(md_data, dict) and md_data.get("success")):
-            return {"media": media, "gameInfo": game_info, "localizedName": localized_name}
+            return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
 
         d = md_data.get("data", {})
         localized_name = d.get("name", "")
@@ -590,10 +603,20 @@ def get_appdetails_full(appid, lang="es"):
             "metacritic":  reviews.get("score", "") if isinstance(reviews, dict) else "",
             "website":     d.get("website", "") or "",
         }
+
+        # Adult content (sexual/nudez). Steam expone los IDs como ints o strings.
+        cd_ids = (d.get("content_descriptors") or {}).get("ids") or []
+        for cid in cd_ids:
+            try:
+                if int(cid) in _ADULT_DESCRIPTOR_IDS:
+                    mature = True
+                    break
+            except (TypeError, ValueError):
+                continue
     except Exception as e:
         print(f"Steam appdetails error: {e}")
 
-    return {"media": media, "gameInfo": game_info, "localizedName": localized_name}
+    return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
 
 
 def _parse_price(text):
