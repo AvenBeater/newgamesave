@@ -181,7 +181,7 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 /* ── WISHLIST GRID ────────────────────────────────────── */
 .wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:40px;}
 
-.wl-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:transform .25s ease,border-color .25s ease,box-shadow .3s ease;animation:fadeUp .35s ease both;cursor:pointer;position:relative;display:flex;flex-direction:column;height:100%;min-width:0;}
+.wl-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:transform .25s ease,border-color .25s ease,box-shadow .3s ease;animation:fadeUp .35s ease both;cursor:pointer;position:relative;}
 .wl-card:hover{border-color:var(--accent);transform:translateY(-4px) scale(1.01);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 20px rgba(0,255,135,.08);}
 .wl-card:hover .wl-card-cover{transform:scale(1.04);}
 .wl-card.has-deal{border-color:rgba(0,255,135,.35);}
@@ -189,30 +189,35 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 
 .wl-card-cover{width:100%;aspect-ratio:46/21;object-fit:cover;display:block;background:var(--surface2);transition:transform .3s ease;}
 .wl-cover-placeholder{display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:900;color:var(--accent);background:var(--surface2);letter-spacing:-1px;}
-.wl-card-body{padding:12px 14px 14px;display:flex;flex:1;flex-direction:column;min-height:0;}
+.wl-card-body{padding:12px 14px 14px;}
 .wl-card-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;line-height:1.3;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.wl-price-content{display:flex;flex:1;flex-direction:column;gap:7px;min-height:0;}
-
 .wl-name-loading{color:var(--muted);font-style:italic;}
 
 .wl-card-loading{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);}
 .wl-card-loading .mini-spinner{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.wl-best-store{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
-.wl-best-price{font-family:'Syne',sans-serif;font-size:1.32rem;font-weight:800;color:var(--accent);line-height:1.05;letter-spacing:0;white-space:nowrap;font-variant-numeric:tabular-nums;}
-.wl-best-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.wl-best-store{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:2px;}
+.wl-best-price{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--accent);line-height:1;margin-bottom:6px;}
+.wl-best-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
 .wl-discount{background:var(--accent2);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:100px;}
 .wl-original{font-size:11px;color:var(--muted);text-decoration:line-through;}
-.wl-stores-count{font-size:10px;color:var(--muted);}
-.wl-history-low{font-size:10px;color:var(--accent);opacity:0.8;}
+.wl-stores-count{font-size:10px;color:var(--muted);margin-bottom:6px;}
+.wl-history-low{font-size:10px;color:var(--accent);margin-top:5px;opacity:0.8;}
 .wl-no-price{font-size:12px;color:var(--muted);font-style:italic;}
 
-.wl-bundle-row{display:flex;align-items:flex-start;gap:5px;padding:5px 8px;background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.25);border-radius:6px;font-size:0.76rem;}
-.wl-bundle-link{color:#f5c518;text-decoration:none;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-width:0;}
+.wl-bundle-row{display:flex;align-items:center;gap:5px;margin-bottom:7px;padding:5px 8px;background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.25);border-radius:6px;font-size:0.76rem;}
+.wl-bundle-row:last-of-type{margin-bottom:12px;}
+.wl-bundle-link{color:#f5c518;text-decoration:none;line-height:1.3;}
 .wl-bundle-link:hover{text-decoration:underline;color:#ffd700;}
-.wl-card-btn{display:block;width:100%;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:8px;border-radius:7px;font-size:11px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:1px;transition:all .2s;margin-top:auto;cursor:pointer;}
+.wl-card-btn{display:block;width:100%;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:8px;border-radius:7px;font-size:11px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:1px;transition:all .2s;margin-top:10px;cursor:pointer;}
 .wl-card-btn:hover{background:var(--accent);color:#000;border-color:transparent;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,255,135,.25);}
+
+/* Botón pegado al fondo en grid view: cards se estiran a la altura de la fila y el botón alinea entre cards. List view intacto. */
+.wl-grid:not(.view-list) .wl-card{display:flex;flex-direction:column;height:100%;}
+.wl-grid:not(.view-list) .wl-card-body{display:flex;flex-direction:column;flex:1;min-height:0;}
+.wl-grid:not(.view-list) .wl-price-content{display:flex;flex-direction:column;flex:1;min-height:0;}
+.wl-grid:not(.view-list) .wl-card-btn{margin-top:auto;}
 
 /* ── Paginación ── */
 .wl-pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 0 40px;flex-wrap:wrap;}
@@ -232,21 +237,21 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 
 /* ── Wishlist: list view ─────────────────────────────────────── */
 .wl-grid.view-list{grid-template-columns:1fr;gap:8px;}
-.wl-grid.view-list .wl-card{display:flex;flex-direction:row;align-items:center;height:auto;overflow:hidden;}
+.wl-grid.view-list .wl-card{display:flex;flex-direction:row;align-items:stretch;}
 .wl-grid.view-list .wl-card:hover{transform:translateY(-2px) scale(1.005);}
 .wl-grid.view-list .wl-card-cover,
-.wl-grid.view-list .wl-cover-placeholder{width:140px;min-width:140px;max-width:140px;height:auto;aspect-ratio:46/21;flex-shrink:0;align-self:stretch;object-fit:cover;position:relative;}
+.wl-grid.view-list .wl-cover-placeholder{width:140px;height:auto;aspect-ratio:46/21;flex-shrink:0;align-self:center;}
 .wl-grid.view-list .wl-cover-placeholder{display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--muted);background:var(--surface2);}
-.wl-grid.view-list .wl-card-body{flex:1;padding:10px 14px;display:flex;flex-direction:row;align-items:center;gap:12px;flex-wrap:nowrap;min-width:0;height:auto;}
-.wl-grid.view-list .wl-card-name{flex:1 1 auto;margin-bottom:0;font-size:14px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block;-webkit-line-clamp:unset;-webkit-box-orient:unset;}
-.wl-grid.view-list .wl-price-content{display:flex;flex-direction:row;align-items:center;gap:10px;flex-wrap:nowrap;flex-shrink:0;margin-left:auto;}
-.wl-grid.view-list .wl-best-store{font-size:9px;margin-bottom:0;white-space:nowrap;min-width:45px;text-align:right;}
-.wl-grid.view-list .wl-best-price{font-size:1.1rem;white-space:nowrap;min-width:90px;}
-.wl-grid.view-list .wl-best-row{margin-top:0;gap:6px;flex-wrap:nowrap;min-width:100px;}
+.wl-grid.view-list .wl-card-body{flex:1;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0;}
+.wl-grid.view-list .wl-card-name{margin-bottom:0;-webkit-line-clamp:2;font-size:14px;min-width:0;}
+.wl-grid.view-list .wl-price-content{display:flex;flex-direction:row;align-items:center;gap:14px;flex-wrap:wrap;}
+.wl-grid.view-list .wl-best-store{font-size:9px;margin-bottom:0;}
+.wl-grid.view-list .wl-best-price{font-size:1.15rem;}
+.wl-grid.view-list .wl-best-row{margin-top:0;gap:6px;}
 .wl-grid.view-list .wl-stores-count,
 .wl-grid.view-list .wl-history-low,
 .wl-grid.view-list .wl-bundle-row{display:none;}
-.wl-grid.view-list .wl-card-btn{width:auto;padding:7px 14px;margin-top:0;flex-shrink:0;white-space:nowrap;min-width:130px;text-align:center;}
+.wl-grid.view-list .wl-card-btn{width:auto;padding:7px 16px;margin-top:0;margin-bottom:0;margin-left:auto;flex-shrink:0;}
 .wl-grid.view-list .wl-card-loading{font-size:12px;}
 .wl-grid.view-list .wl-no-price{font-size:12px;}
 
@@ -254,31 +259,17 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .wl-grid.view-list .wl-hltb-badge,
 .wl-grid.view-list .wl-rev-badge,
 .wl-grid.view-list .wl-mc-badge{font-size:9px;padding:2px 5px;top:4px;letter-spacing:0;}
-.wl-grid.view-list .wl-hltb-badge{right:auto;left:100px;}
+.wl-grid.view-list .wl-hltb-badge{right:4px;}
 .wl-grid.view-list .wl-rev-badge,
 .wl-grid.view-list .wl-mc-badge{left:4px;}
 
-/* Tablet ≤768px: allow price-content to wrap so button doesn't overflow */
-@media(max-width:768px){
-  .wl-grid.view-list .wl-card-cover,
-  .wl-grid.view-list .wl-cover-placeholder{width:120px;min-width:120px;max-width:120px;}
-  .wl-grid.view-list .wl-card-body{flex-wrap:wrap;gap:8px;}
-  .wl-grid.view-list .wl-price-content{flex-wrap:wrap;gap:8px;}
-}
-
-/* Mobile ≤540px: hide name, keep all price info visible */
 @media(max-width:540px){
   .site-logo{width:min(250px,90vw);}
   .wl-grid.view-list .wl-card-cover,
-  .wl-grid.view-list .wl-cover-placeholder{width:96px;min-width:96px;max-width:96px;}
-  .wl-grid.view-list .wl-card-body{padding:8px 10px;gap:6px;flex-wrap:wrap;align-content:center;}
-  .wl-grid.view-list .wl-card-name{display:none;}
-  .wl-grid.view-list .wl-price-content{flex-wrap:wrap;gap:6px;width:100%;}
-  .wl-grid.view-list .wl-best-store{font-size:8px;letter-spacing:1px;}
-  .wl-grid.view-list .wl-best-price{font-size:0.95rem;}
-  .wl-grid.view-list .wl-best-row{flex-wrap:nowrap;gap:5px;}
-  .wl-grid.view-list .wl-original{font-size:10px;}
-  .wl-grid.view-list .wl-card-btn{font-size:10px;padding:5px 10px;width:100%;}
+  .wl-grid.view-list .wl-cover-placeholder{width:96px;}
+  .wl-grid.view-list .wl-card-body{padding:8px 10px;gap:6px;}
+  .wl-grid.view-list .wl-card-btn{font-size:10px;padding:5px 12px;}
+  .wl-grid.view-list .wl-best-price{font-size:1rem;}
 }
 
 /* ── SKELETON LOADING ────────────────────────────────── */
