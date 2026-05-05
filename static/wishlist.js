@@ -881,8 +881,6 @@ function buildPriceContent(game, priceData) {
   }
 
   var best     = priceData.best;
-  var currency = document.getElementById('sel-currency').value;
-
   var storeEl = document.createElement('div');
   storeEl.className = 'wl-best-store';
   storeEl.textContent = best.storeName;
@@ -890,7 +888,7 @@ function buildPriceContent(game, priceData) {
 
   var priceEl = document.createElement('div');
   priceEl.className = 'wl-best-price';
-  priceEl.textContent = fmtPrice(best.priceNative) + ' ' + currency;
+  priceEl.textContent = displayPrice(best.priceNative);
   frag.appendChild(priceEl);
 
   if (best.discount > 0) {
@@ -901,7 +899,7 @@ function buildPriceContent(game, priceData) {
     disc.textContent = '-' + best.discount + '%';
     var orig = document.createElement('span');
     orig.className = 'wl-original';
-    orig.textContent = fmtPrice(best.originalNative) + ' ' + currency;
+    orig.textContent = displayPrice(best.originalNative);
     row.appendChild(disc);
     row.appendChild(orig);
     frag.appendChild(row);
@@ -918,7 +916,7 @@ function buildPriceContent(game, priceData) {
   if (best.storeLowNative && best.storeLowNative > 0 && best.storeLowNative <= best.priceNative) {
     var histEl = document.createElement('div');
     histEl.className = 'wl-history-low';
-    histEl.textContent = '\ud83d\udcc9 ' + t('historicLow') + ' ' + best.storeName + ': ' + fmtPrice(best.storeLowNative) + ' ' + currency;
+    histEl.textContent = '\ud83d\udcc9 ' + t('historicLow') + ' ' + best.storeName + ': ' + displayPrice(best.storeLowNative);
     frag.appendChild(histEl);
   }
 
@@ -946,7 +944,7 @@ function buildPriceContent(game, priceData) {
         bundleLink.textContent = text;
       } else {
         // Otras tiendas: mostrar precio
-        var bundlePrice = fmtPrice(b.priceNative) + ' ' + currency;
+        var bundlePrice = displayPrice(b.priceNative);
         var storeName = b.storeName || 'Bundle';
         var text = t('bundleIn') + ' ' + storeName + ': ' + bundlePrice;
         if (b.gamesCount > 1) text += ' (' + b.gamesCount + ' ' + t('bundleGames') + ')';

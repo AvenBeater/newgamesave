@@ -36,9 +36,10 @@ function renderResults(data,gameName){
     overlay.className = 'game-card-hero-overlay';
     var tag = document.createElement('div'); tag.className='best-deal-tag'; tag.textContent=t('bestPrice');
     var infoLeft = document.createElement('div');
+    infoLeft.className = 'best-deal-info';
     var lbl = document.createElement('div'); lbl.className='store-label'; lbl.textContent=t('bestLabel');
     var sname = document.createElement('div'); sname.className='store-name'; sname.textContent=best.storeName;
-    var pmain = document.createElement('div'); pmain.className='price-main'; pmain.textContent=fmtPrice(best.priceNative)+' '+currentCurrency;
+    var pmain = document.createElement('div'); pmain.className='price-main'; pmain.textContent=displayPrice(best.priceNative);
     infoLeft.appendChild(lbl); infoLeft.appendChild(sname); infoLeft.appendChild(pmain);
     if(best.discount>0){
       var psub=document.createElement('div'); psub.className='price-sub';
@@ -101,7 +102,7 @@ function renderResults(data,gameName){
 
   var st=document.getElementById('status');
   st.style.display='block';
-  st.innerHTML=t('rateLabel')+' USD/'+currentCurrency+': <span>'+fmtPrice(data.rate)+'</span> &middot; '+t('updated');
+  st.innerHTML=rateStatusText(data.rate);
   renderGrid(prices);
 }
 
@@ -146,8 +147,8 @@ function renderGrid(prices){
       h+="<div class='card-store'><div class='store-badge'><span class='store-dot' style='background:"+p.color+"'></span>"+esc(p.storeName)+"</div>";
       if(p.discount>0) h+="<span class='discount-badge'>-"+p.discount+"%</span>";
       if(p.lang && p.lang!==currentLang) h+="<span class='lang-tag'>"+p.langFlag+" "+p.langLabel+"</span>";
-      h+="</div><div class='price-info'><div class='card-price'>"+fmtPrice(p.priceNative)+" "+currentCurrency+"</div>";
-      if(p.discount>0) h+="<div class='card-original'>"+fmtPrice(p.originalNative)+"</div>";
+      h+="</div><div class='price-info'><div class='card-price'>"+displayPrice(p.priceNative)+"</div>";
+      if(p.discount>0) h+="<div class='card-original'>"+displayPrice(p.originalNative)+"</div>";
       h+="</div><a class='btn-buy' href='"+esc(p.url)+"' target='_blank'>"+t("goShort")+" &#x2192;</a></div>";
     }
     grid.innerHTML=h;
@@ -162,8 +163,8 @@ function renderGrid(prices){
       if(p.discount>0) h+="<span class='discount-badge'>-"+p.discount+"%</span>";
       h+="</div>";
       if(p.lang && p.lang!==currentLang) h+="<div style='margin-bottom:10px'><span class='lang-tag'>"+p.langFlag+" "+p.langLabel+"</span></div>";
-      h+="<div class='card-price'>"+fmtPrice(p.priceNative)+" "+currentCurrency+"</div>";
-      if(p.discount>0) h+="<div class='card-original'>"+t("before")+" "+fmtPrice(p.originalNative)+"</div>";
+      h+="<div class='card-price'>"+displayPrice(p.priceNative)+"</div>";
+      if(p.discount>0) h+="<div class='card-original'>"+t("before")+" "+displayPrice(p.originalNative)+"</div>";
       h+="<a class='btn-buy' href='"+esc(p.url)+"' target='_blank'>"+t("goStore")+" &#x2192;</a></div>";
     }
     grid.innerHTML=h;

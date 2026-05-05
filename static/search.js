@@ -33,7 +33,7 @@ function renderSuggestions(games){
     html+="<div class='suggestion-item' onclick='selectGameByIndex("+i+")'>";
     html+="<img src='"+esc(g.image)+"' onerror='hideImg(this)' alt=''>";
     html+="<span class='suggestion-name'>"+esc(g.name)+"</span>";
-    if(g.price) html+="<span class='suggestion-price'>"+fmtPrice(g.price)+"</span>";
+    if(g.price) html+="<span class='suggestion-price'>"+displayPrice(g.price)+"</span>";
     html+="</div>";
   }
   suggestionsEl.innerHTML=html;
