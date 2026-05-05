@@ -198,6 +198,48 @@ function _buildCustomVideoPlayer(item, options){
   volume.value = '1';
   controls.appendChild(volume);
 
+  // Selector de calidad (solo cuando hay par 480/max y no estamos usando HLS adaptativo).
+  var sources = item.sources || {};
+  var hasHls = !!sources.hls && (typeof Hls !== 'undefined' && Hls.isSupported());
+  var qualityPair = null;
+  if(!hasHls){
+    if(sources.mp4_low && sources.mp4_high){
+      qualityPair = { low: sources.mp4_low, high: sources.mp4_high };
+    } else if(sources.webm_low && sources.webm_high){
+      qualityPair = { low: sources.webm_low, high: sources.webm_high };
+    }
+  }
+  var currentQuality = 'low';  // default 480 por bandwidth; usuario puede subir a HD
+  var qualityBtn = null;
+  if(qualityPair){
+    qualityBtn = document.createElement('button');
+    qualityBtn.className = 'media-video-btn media-video-quality';
+    qualityBtn.type = 'button';
+    qualityBtn.textContent = 'HD';
+    var qualityLabel = _mediaText('mediaQualityHD', 'Toggle HD quality');
+    qualityBtn.title = qualityLabel;
+    qualityBtn.setAttribute('aria-label', qualityLabel);
+    qualityBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var time = vid.currentTime;
+      var wasPaused = vid.paused;
+      currentQuality = (currentQuality === 'high') ? 'low' : 'high';
+      qualityBtn.classList.toggle('is-active', currentQuality === 'high');
+
+      // Reemplaza la fuente y restaura tiempo + estado de play.
+      vid.src = qualityPair[currentQuality];
+      vid.load();
+      var onMeta = function(){
+        vid.removeEventListener('loadedmetadata', onMeta);
+        try { vid.currentTime = time; } catch(err) {}
+        if(!wasPaused) vid.play().catch(function(){});
+      };
+      vid.addEventListener('loadedmetadata', onMeta);
+      showControls();
+    });
+    controls.appendChild(qualityBtn);
+  }
+
   wrap.appendChild(controls);
 
   function setNavIdle(idle){
@@ -354,7 +396,10 @@ function _buildCustomVideoPlayer(item, options){
   controls.addEventListener('focusin', function(){ clearTimeout(hideControlsTimer); wrap.classList.remove('controls-hidden'); });
   controls.addEventListener('focusout', scheduleControlsHide);
 
-  var hls = _attachVideoSource(vid, item, !!options.autoplay);
+  // Si hay quality pair (no HLS), forzamos arranque en low para evitar
+  // que `item.src` (que puede ser HLS no soportado) llegue al video tag.
+  var attachItem = qualityPair ? { type: 'video', src: qualityPair[currentQuality] } : item;
+  var hls = _attachVideoSource(vid, attachItem, !!options.autoplay);
   if(options.onHls) options.onHls(hls);
   updatePlayState();
   updateVolumeState();
