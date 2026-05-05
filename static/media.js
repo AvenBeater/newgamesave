@@ -509,7 +509,6 @@ function openMediaTheater(idx){
 
   var stage = document.createElement('div');
   stage.className = 'media-theater-stage';
-  stage.addEventListener('click', function(e){ e.stopPropagation(); });
   overlay.appendChild(stage);
 
   var footer = document.createElement('div');
@@ -601,7 +600,19 @@ function openMediaTheater(idx){
     e.stopPropagation();
     moveMedia(1);
   });
-  overlay.addEventListener('click', closeMediaTheater);
+  // Cierra solo si el click es sobre area vacia (overlay padding, letterbox del stage,
+  // o area vacia del video player). Los media reales y los controles tienen sus propios
+  // stopPropagation o no estan en la lista de close.
+  overlay.addEventListener('click', function(e){
+    var target = e.target;
+    if(target === overlay || target === stage){
+      closeMediaTheater();
+      return;
+    }
+    if(target.classList && target.classList.contains('media-video-player')){
+      closeMediaTheater();
+    }
+  });
 
   _mediaTheaterKeyHandler = function(e){
     if(e.key === 'Escape') { closeMediaTheater(); return; }
@@ -700,6 +711,24 @@ function renderMediaPanel(media){
       thumb.appendChild(img2);
     }
     thumb.addEventListener('click', function(){ selectMedia(i); });
+
+    // A11y: Tab navega la ruleta de thumbnails (focus = preview en el viewer);
+    // Enter / Space abre el media en el theater (fullscreen).
+    thumb.tabIndex = 0;
+    thumb.setAttribute('role', 'button');
+    var thumbLabel = (item.title && String(item.title).trim()) || _mediaText('mediaThumb', 'Media') + ' ' + (i + 1);
+    thumb.setAttribute('aria-label', thumbLabel);
+    thumb.addEventListener('focus', function(){
+      if(_mediaIdx !== i) selectMedia(i);
+    });
+    thumb.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        selectMedia(i);
+        openMediaTheater(i);
+      }
+    });
+
     scroll.appendChild(thumb);
   });
   panel.appendChild(scroll);
