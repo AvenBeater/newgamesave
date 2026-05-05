@@ -169,6 +169,15 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
   .media-viewer img,.media-viewer video,.media-video-el{object-fit:contain;}
   .price-main{font-size:1.8rem;}
 }
+/* Controles del video en pantallas angostas: switch a flex para que no se solape con .media-actions */
+@media(max-width:595px){
+  .media-actions{right:8px;bottom:8px;gap:6px;}
+  .media-video-controls{display:flex;align-items:center;gap:8px;left:8px;right:100px;padding:5px 10px;}
+  .media-theater-stage .media-video-controls{left:8px;right:100px;bottom:42px;}
+  .media-video-volume{display:none;}
+  .media-video-progress{flex:1;min-width:50px;}
+  .media-video-time{font-size:11px;}
+}
 .status{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:20px;font-size:12px;color:var(--muted);display:none;}
 .status span{color:var(--accent);}
 .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:40px;}
