@@ -42,12 +42,12 @@ function renderResults(data,gameName){
     infoLeft.appendChild(lbl); infoLeft.appendChild(sname); infoLeft.appendChild(pmain);
     if(best.discount>0){
       var psub=document.createElement('div'); psub.className='price-sub';
-      psub.innerHTML='&#128293; '+best.discount+'% '+t('discount').toLowerCase();
+      psub.innerHTML='<span class="pa-icon pa-icon-fire"></span> '+best.discount+'% '+t('discount').toLowerCase();
       infoLeft.appendChild(psub);
     }
     var abtn=document.createElement('a'); abtn.className='best-deal-btn';
     abtn.href=best.url; abtn.target='_blank';
-    abtn.textContent=t('goStore')+' \u2192';
+    abtn.innerHTML=esc(t('goStore'))+' <span class="pa-icon pa-icon-arrow-right"></span>';
     overlay.appendChild(tag); overlay.appendChild(infoLeft); overlay.appendChild(abtn);
     hero.appendChild(overlay);
 

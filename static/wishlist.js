@@ -235,7 +235,7 @@ function loadWishlist() {
 
       if (data.error) {
         document.getElementById('wl-empty').style.display = '';
-        document.getElementById('wl-empty').querySelector('p').textContent = '\u26a0\ufe0f ' + data.error;
+        document.getElementById('wl-empty').querySelector('p').innerHTML = '<span class="pa-icon pa-icon-warning"></span> ' + esc(data.error);
         return;
       }
 
@@ -262,7 +262,7 @@ function loadWishlist() {
       document.getElementById('wl-loading').style.display = 'none';
       document.getElementById('btn-wishlist').disabled    = false;
       document.getElementById('wl-empty').style.display   = '';
-      document.getElementById('wl-empty').querySelector('p').textContent = '\u26a0\ufe0f ' + t('wlConnError') + e.message;
+      document.getElementById('wl-empty').querySelector('p').innerHTML = '<span class="pa-icon pa-icon-warning"></span> ' + esc(t('wlConnError') + e.message);
     });
 }
 
@@ -618,17 +618,19 @@ function sortWishlist(mode) {
   var durBtn = document.getElementById('wsort-duration');
   if (durBtn) {
     durBtn.classList.toggle('active', isDuration);
-    durBtn.textContent = isDuration
+    var durTxt = isDuration
       ? (mode === 'duration-asc' ? t('sortDurationAsc') : t('sortDurationDesc'))
       : t('sortDuration');
+    durBtn.innerHTML = '<span class="pa-icon pa-icon-clock"></span> ' + esc(durTxt);
     durBtn.disabled = false;
   }
   var revBtn = document.getElementById('wsort-reviews');
   if (revBtn) {
     revBtn.classList.toggle('active', isReviews);
-    revBtn.textContent = isReviews
+    var revTxt = isReviews
       ? (mode === 'reviews-desc' ? t('sortReviewsBest') : t('sortReviewsWorst'))
       : t('sortSteamReviews');
+    revBtn.innerHTML = '<span class="pa-icon pa-icon-sparkles"></span> ' + esc(revTxt);
     revBtn.disabled = false;
   }
   var mcBtn = document.getElementById('wsort-metacritic');
@@ -799,9 +801,9 @@ function buildWishlistCard(game, animIdx) {
   hltbBadge.id = 'wlhltb-' + game.appid;
   var h = _wlHltb[game.appid];
   if (h && h > 0) {
-    hltbBadge.textContent = '\ud83d\udd50 ' + fmtHours(h);
+    hltbBadge.innerHTML = '<span class="pa-icon pa-icon-clock"></span> ' + fmtHours(h);
   } else if (_wlHltbReady) {
-    hltbBadge.textContent = t('hltbNoData');
+    hltbBadge.innerHTML = '<span class="pa-icon pa-icon-clock" style="opacity:.4"></span> ' + t('hltbNoData');
     hltbBadge.style.opacity = '0.4';
   } else {
     hltbBadge.style.display = 'none';
@@ -818,10 +820,10 @@ function buildWishlistCard(game, animIdx) {
   if (showMC) {
     revBadge.style.display = 'none';
   } else if (revData && revData.score !== null) {
-    revBadge.textContent = '\u2b50 ' + revData.score + '%';
+    revBadge.innerHTML = '<span class="pa-icon pa-icon-sparkles"></span> ' + revData.score + '%';
     revBadge.style.borderColor = reviewScoreColor(revData.score);
   } else if (_wlReviewsReady) {
-    revBadge.textContent = '\u2b50 N/A';
+    revBadge.innerHTML = '<span class="pa-icon pa-icon-sparkles"></span> N/A';
     revBadge.style.opacity = '0.4';
   } else {
     revBadge.style.display = 'none';
@@ -929,7 +931,7 @@ function buildPriceContent(game, priceData) {
       bundleWrap.className = 'wl-bundle-row';
 
       var bundleIcon = document.createElement('span');
-      bundleIcon.textContent = '\ud83c\udf81';
+      bundleIcon.className = 'pa-icon pa-icon-gift';
 
       var bundleLink = document.createElement('a');
       bundleLink.className = 'wl-bundle-link';
@@ -963,7 +965,7 @@ function buildPriceContent(game, priceData) {
   btn.className = 'wl-card-btn';
   btn.href = best.url;
   btn.target = '_blank';
-  btn.textContent = t('goTo') + ' ' + best.storeName + ' \u2192';
+  btn.innerHTML = esc(t('goTo')) + ' ' + esc(best.storeName) + ' <span class="pa-icon pa-icon-arrow-right"></span>';
   btn.addEventListener('click', function(e){ e.stopPropagation(); });
   frag.appendChild(btn);
 
