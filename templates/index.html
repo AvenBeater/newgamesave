@@ -18,7 +18,7 @@
 <body>
 <div class="container">
   <header>
-    <h1>NewGame+Save</h1>
+    <img class="site-logo" src="/static/assets/NG+Save_IDLOGO.svg" alt="NewGame+Save" width="84" height="25.25">
     <p class="subtitle" id="ui-subtitle">Compare game prices in real time</p>
     <div class="rate-badge"><span class="dot"></span><span id="rate-text">Loading...</span></div>
   </header>
@@ -43,8 +43,8 @@
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" id="tab-search" onclick="switchTab('search')">&#128269; Search game</button>
-    <button class="tab" id="tab-wishlist" onclick="switchTab('wishlist')">&#10084; My Wishlist <span class="tab-badge zero" id="wl-deal-badge">0</span></button>
+    <button class="tab active" id="tab-search" onclick="switchTab('search')"><span class="pa-icon pa-icon-search"></span> Search game</button>
+    <button class="tab" id="tab-wishlist" onclick="switchTab('wishlist')"><span class="pa-icon pa-icon-heart"></span> My Wishlist <span class="tab-badge zero" id="wl-deal-badge">0</span></button>
   </div>
 
   <!-- TAB: BUSCAR -->
@@ -52,7 +52,7 @@
     <div class="search-section">
       <div class="search-box">
         <input type="text" id="search-input" autocomplete="off" placeholder="Search a game...">
-        <button class="btn-clear" id="btn-clear" onclick="clearSearch()" style="display:none">&times;</button>
+        <button class="btn-clear" id="btn-clear" onclick="clearSearch()" style="display:none"><span class="pa-icon pa-icon-cancel"></span></button>
         <button class="btn-search" id="btn-search" onclick="searchGame()">Search prices</button>
       </div>
       <div class="suggestions" id="suggestions"></div>
@@ -63,9 +63,9 @@
         <h2 id="game-title"></h2>
         <span class="game-subtitle" id="game-subtitle"></span>
         <div class="view-controls">
-          <button class="view-btn active" id="btn-grid"  onclick="setView('grid')"  title="Grid view" aria-label="Grid view">&#x229E;</button>
-          <button class="view-btn"        id="btn-list"  onclick="setView('list')"  title="List view" aria-label="List view">&#9776;</button>
-          <button class="view-btn"        id="btn-table" onclick="setView('table')" title="Table view" aria-label="Table view">&#x229F;</button>
+          <button class="view-btn active" id="btn-grid"  onclick="setView('grid')"  title="Grid view" aria-label="Grid view"><span class="pa-icon pa-icon-grid"></span></button>
+          <button class="view-btn"        id="btn-list"  onclick="setView('list')"  title="List view" aria-label="List view"><span class="pa-icon pa-icon-list"></span></button>
+          <button class="view-btn"        id="btn-table" onclick="setView('table')" title="Table view" aria-label="Table view"><span class="pa-icon pa-icon-table"></span></button>
         </div>
       </div>
       <div class="game-card" id="best-deal"></div>
@@ -73,7 +73,7 @@
       <div class="price-grid" id="price-grid"></div>
     </div>
     <div class="empty" id="empty">
-      <div class="icon">&#127918;</div>
+      <div class="icon"><span class="pa-icon pa-icon-gamepad"></span></div>
       <p id="ui-empty">Search a game to see compared prices</p>
     </div>
   </div>
@@ -84,11 +84,11 @@
       <div class="search-box">
         <input type="text" id="wishlist-input" autocomplete="off"
                placeholder="Steam ID, profile name or Steam URL" oninput="updateWlClearBtn()">
-        <button class="btn-clear" id="btn-wl-clear" onclick="clearWishlistSearch()" style="display:none">&times;</button>
-        <button class="btn-search" id="btn-wishlist" onclick="loadWishlist()">&#10084; Load wishlist</button>
+        <button class="btn-clear" id="btn-wl-clear" onclick="clearWishlistSearch()" style="display:none"><span class="pa-icon pa-icon-cancel"></span></button>
+        <button class="btn-search" id="btn-wishlist" onclick="loadWishlist()"><span class="pa-icon pa-icon-heart"></span> Load wishlist</button>
       </div>
       <p class="wl-hint">Profile must be <strong>public</strong> &middot;
-        <a href="https://steamcommunity.com/my/edit/settings" target="_blank">Configure privacy &#8599;</a>
+        <a href="https://steamcommunity.com/my/edit/settings" target="_blank">Configure privacy <span class="pa-icon pa-icon-external"></span></a>
       </p>
     </div>
     <div class="loading" id="wl-loading" style="display:none">
@@ -99,16 +99,16 @@
         <h2 id="wl-title">My Wishlist</h2>
         <span class="game-subtitle" id="wl-subtitle"></span>
         <div class="view-controls">
-          <button class="view-btn active" id="wl-btn-grid" onclick="setWlView('grid')" title="Grid view" aria-label="Grid view">&#x229E;</button>
-          <button class="view-btn"        id="wl-btn-list" onclick="setWlView('list')" title="List view" aria-label="List view">&#9776;</button>
+          <button class="view-btn active" id="wl-btn-grid" onclick="setWlView('grid')" title="Grid view" aria-label="Grid view"><span class="pa-icon pa-icon-grid"></span></button>
+          <button class="view-btn"        id="wl-btn-list" onclick="setWlView('list')" title="List view" aria-label="List view"><span class="pa-icon pa-icon-list"></span></button>
         </div>
         <div class="wl-sort-bar">
           <span class="wl-sort-label">Sort:</span>
           <button class="wl-sort-btn active" id="wsort-discount" onclick="sortWishlist('discount')">Discount</button>
           <button class="wl-sort-btn" id="wsort-price"    onclick="sortWishlist('price')">Price</button>
           <button class="wl-sort-btn" id="wsort-name"     onclick="sortWishlist('name')">Name</button>
-          <button class="wl-sort-btn" id="wsort-duration" onclick="sortWishlist('duration')" disabled title="Loading playtimes...">⏱ Duration</button>
-          <button class="wl-sort-btn" id="wsort-reviews" onclick="sortWishlist('reviews')" disabled title="Loading Steam reviews...">⭐ Steam Reviews</button>
+          <button class="wl-sort-btn" id="wsort-duration" onclick="sortWishlist('duration')" disabled title="Loading playtimes..."><span class="pa-icon pa-icon-clock"></span> Duration</button>
+          <button class="wl-sort-btn" id="wsort-reviews" onclick="sortWishlist('reviews')" disabled title="Loading Steam reviews..."><span class="pa-icon pa-icon-sparkles"></span> Steam Reviews</button>
           <button class="wl-sort-btn" id="wsort-metacritic" onclick="sortWishlist('metacritic')" disabled title="Loading Metacritic scores...">MC Score</button>
           <span class="wl-sort-sep"></span>
           <span class="wl-sort-label">Per page:</span>
@@ -131,13 +131,13 @@
       </div>
       <div class="wl-search-wrap" id="wl-search-wrap" style="display:none">
         <input type="text" id="wl-search" class="wl-search-input" placeholder="Search in your wishlist..." autocomplete="off">
-        <button class="wl-search-clear" id="wl-search-clear" title="Clear">&times;</button>
+        <button class="wl-search-clear" id="wl-search-clear" title="Clear"><span class="pa-icon pa-icon-cancel"></span></button>
       </div>
       <div class="wl-grid" id="wl-grid"></div>
       <div id="wl-pagination" class="wl-pagination" style="display:none"></div>
     </div>
     <div class="empty" id="wl-empty">
-      <div class="icon">&#10084;</div>
+      <div class="icon"><span class="pa-icon pa-icon-heart"></span></div>
       <p>Enter your Steam ID, profile name or URL to see your wishlist prices</p>
     </div>
   </div>
@@ -159,25 +159,27 @@
   <span class="ad-slot-placeholder">Ad slot reserved</span>
 </div>
 
-<button class="scroll-top" id="scroll-top" title="Scroll to top">&#8593;</button>
+<button class="scroll-top" id="scroll-top" title="Scroll to top"><span class="pa-icon pa-icon-arrow-up"></span></button>
 
 <!-- Widget de donación (PayPal) -->
 <div class="donate-fab-wrap">
   <button class="donate-fab" id="donate-fab" aria-label="Buy me a coffee" onclick="toggleDonate()">
-    <span aria-hidden="true">&#9749;</span>
+    <span class="pa-icon pa-icon-coffee pa-icon-lg" aria-hidden="true"></span>
   </button>
   <div class="donate-card" id="donate-card" role="dialog" aria-hidden="true">
-    <button class="donate-close" onclick="toggleDonate()" aria-label="Close">&times;</button>
+    <button class="donate-close" onclick="toggleDonate()" aria-label="Close"><span class="pa-icon pa-icon-cancel"></span></button>
     <div class="donate-title" id="donate-title">Buy me a coffee</div>
     <p class="donate-msg" id="donate-msg">Any coffee you'd like to share will be welcome in this house</p>
     <a class="donate-btn" id="donate-link" href="https://www.paypal.com/donate?business=aaaguirre.albert%40gmail.com&item_name=NewGame%2BSave+Coffee+Tip&currency_code=USD" target="_blank" rel="noopener noreferrer">
-      <span aria-hidden="true">&#9829;</span>&nbsp;<span id="donate-btn-label">Donate with PayPal</span>
+      <span class="pa-icon pa-icon-heart" aria-hidden="true"></span>&nbsp;<span id="donate-btn-label">Donate with PayPal</span>
     </a>
   </div>
 </div>
 
 <script src="/static/i18n.js"></script>
+<script src="/static/toast.js"></script>
 <script src="/static/helpers.js"></script>
+<script src="/static/age-gate.js"></script>
 <script src="/static/media.js"></script>
 <script src="/static/render.js"></script>
 <script src="/static/search.js"></script>

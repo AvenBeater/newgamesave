@@ -134,16 +134,16 @@ function applyLang(){
   document.getElementById("ui-empty").textContent     = t("empty");
   document.getElementById("ui-footer").textContent    = t("footer");
   // Tabs
-  document.getElementById("tab-search").innerHTML   = "&#128269; " + t("tabSearch");
+  document.getElementById("tab-search").innerHTML   = '<span class="pa-icon pa-icon-search"></span> ' + t("tabSearch");
   var _wlBadge = document.getElementById("wl-deal-badge");
   var _wlBadgeHTML = _wlBadge ? _wlBadge.outerHTML : '<span class="tab-badge zero" id="wl-deal-badge">0</span>';
-  document.getElementById("tab-wishlist").innerHTML  = "&#10084; " + t("tabWishlist") + " " + _wlBadgeHTML;
+  document.getElementById("tab-wishlist").innerHTML  = '<span class="pa-icon pa-icon-heart"></span> ' + t("tabWishlist") + " " + _wlBadgeHTML;
   // Wishlist
   document.getElementById("wishlist-input").placeholder = t("wlInputPH");
-  document.getElementById("btn-wishlist").innerHTML     = "&#10084; " + t("wlLoadBtn");
+  document.getElementById("btn-wishlist").innerHTML     = '<span class="pa-icon pa-icon-heart"></span> ' + t("wlLoadBtn");
   document.getElementById("wl-title").textContent       = t("wlTitle");
   var wlHint = document.querySelector(".wl-hint");
-  if(wlHint) wlHint.innerHTML = t("wlProfilePublic") + ' &middot; <a href="https://steamcommunity.com/my/edit/settings" target="_blank">' + t("wlConfigPrivacy") + ' &#8599;</a>';
+  if(wlHint) wlHint.innerHTML = t("wlProfilePublic") + ' &middot; <a href="https://steamcommunity.com/my/edit/settings" target="_blank">' + t("wlConfigPrivacy") + ' <span class="pa-icon pa-icon-external"></span></a>';
   var wlLoadP = document.querySelector("#wl-loading p");
   if(wlLoadP) wlLoadP.textContent = t("wlLoading");
   var wlEmptyP = document.querySelector("#wl-empty p");
@@ -266,7 +266,6 @@ function clearSearch(){
 
   hideAll();
   document.getElementById("empty").style.display="block";
-  try{ localStorage.clear(); }catch(e){}
 }
 
 function updateClearBtn(){
@@ -280,11 +279,30 @@ function clearWishlistSearch(){
   document.getElementById("wl-results").style.display="none";
   document.getElementById("wl-empty").style.display="";
   document.getElementById("wl-empty").querySelector("p").textContent=t("wlEmpty");
+  var badge=document.getElementById("wl-deal-badge");
+  if(badge){ badge.textContent=""; badge.classList.add("zero"); }
   cancelHltb();
   cancelReviews();
   cancelMetacritic();
+  _clearLocalStorageExcept(["newgamesave_dob_v1"]);
+}
 
-  try{ localStorage.clear(); }catch(e){}
+// Limpieza de localStorage que preserva las claves listadas. Reemplaza
+// el `localStorage.clear()` original (que nukeaba TODO) para que ciertas
+// preferencias persistentes — como la fecha de nacimiento verificada del
+// age-gate — sobrevivan al click en la X.
+function _clearLocalStorageExcept(preserveKeys){
+  try {
+    var saved = {};
+    (preserveKeys || []).forEach(function(k){
+      var v = localStorage.getItem(k);
+      if(v !== null) saved[k] = v;
+    });
+    localStorage.clear();
+    Object.keys(saved).forEach(function(k){
+      localStorage.setItem(k, saved[k]);
+    });
+  } catch(e){}
 }
 
 function updateWlClearBtn(){

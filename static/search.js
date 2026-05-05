@@ -67,12 +67,34 @@ async function fetchPrices(appId,gameName){
   try{
     var url="/api/prices?appid="+appId+"&name="+encodeURIComponent(gameName)+"&currency="+currentCurrency+"&lang="+currentLang;
     var r=await fetch(url);
-    lastData=await r.json();
-    var displayName = (lastData.localizedName && lastData.localizedName.trim()) ? lastData.localizedName : gameName;
-    lastGameName=displayName;
-    searchInput.value=displayName;
-    updateClearBtn();
-    if(selectedGame) selectedGame.name=displayName;
-    renderResults(lastData,displayName);
+    var data=await r.json();
+
+    var paint = function(){
+      lastData = data;
+      var displayName = (lastData.localizedName && lastData.localizedName.trim()) ? lastData.localizedName : gameName;
+      lastGameName=displayName;
+      searchInput.value=displayName;
+      updateClearBtn();
+      if(selectedGame) selectedGame.name=displayName;
+      renderResults(lastData,displayName);
+    };
+
+    // Gate de contenido adulto. Si el juego es mature y el usuario no
+    // está verificado, abre el modal y aplaza el render. Si cancela /
+    // cierra / es menor de edad, limpia el input y vuelve al estado vacío.
+    if(data && data.mature && typeof window.requireAgeVerification === "function"){
+      requireAgeVerification({
+        onConfirm: paint,
+        onCancel: function(){
+          searchInput.value = "";
+          updateClearBtn();
+          selectedGame = null;
+          showEmpty();
+        }
+      });
+      return;
+    }
+
+    paint();
   }catch(e){showEmpty();}
 }
