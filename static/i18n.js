@@ -98,6 +98,8 @@ const I18N = {
     mediaMute:"Silenciar",
     mediaUnmute:"Activar sonido",
     mediaQualityHD:"Calidad HD",
+    seeMore:"Ver más",
+    seeLess:"Ver menos",
     appLoading:"Cargando...",
     // Age gate
     ageModalTitle:"Verificaci\u00f3n de edad",
@@ -201,6 +203,8 @@ const I18N = {
     mediaMute:"Mute",
     mediaUnmute:"Unmute",
     mediaQualityHD:"HD quality",
+    seeMore:"See more",
+    seeLess:"See less",
     appLoading:"Loading...",
     // Age gate
     ageModalTitle:"Age verification",
@@ -304,6 +308,8 @@ const I18N = {
     mediaMute:"Silenciar",
     mediaUnmute:"Ativar som",
     mediaQualityHD:"Qualidade HD",
+    seeMore:"Ver mais",
+    seeLess:"Ver menos",
     appLoading:"Carregando...",
     // Age gate
     ageModalTitle:"Verifica\u00e7\u00e3o de idade",
@@ -407,6 +413,8 @@ const I18N = {
     mediaMute:"Couper le son",
     mediaUnmute:"Activer le son",
     mediaQualityHD:"Qualité HD",
+    seeMore:"Voir plus",
+    seeLess:"Voir moins",
     appLoading:"Chargement...",
     // Age gate
     ageModalTitle:"V\u00e9rification d'\u00e2ge",
