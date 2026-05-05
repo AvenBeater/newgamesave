@@ -356,7 +356,10 @@ function loadWishlistPrices(currency) {
 
 // Fase 2: Scrape unificado de Steam (precio + reviews + MC + bundles en 1 call)
 function _enrichWishlistPrices(currency) {
-  var allAppids = _wlGames.map(function(g) { return g.appid; });
+  var allAppids = _wlGames.filter(function(g) {
+    var p = _wlPrices[g.appid];
+    return p && p.best;
+  }).map(function(g) { return g.appid; });
 
   if (!allAppids.length) {
     _wlAllLoaded = true;
@@ -399,17 +402,12 @@ function _enrichWishlistPrices(currency) {
         var appid = data.appid;
         var isError = data.error;
 
-        // Precio: Steam cubre juegos que ITAD no encontro; si ITAD ya tenia
-        // precio, Steam solo reemplaza cuando es mas barato.
+        // Precio: solo reemplazar si Steam es más barato que ITAD
         var existing = _wlPrices[appid];
-        if (!existing) {
-          existing = { appid: appid, best: null, allCount: 0, name: "" };
-        }
-        if (data.price && (!existing.best || data.price.priceNative < existing.best.priceNative)) {
-          existing.best = data.price;
-          existing.allCount = Math.max(existing.allCount || 0, 1);
-        }
-        if (existing.best || (data.bundles && data.bundles.length)) {
+        if (existing && existing.best) {
+          if (data.price && data.price.priceNative < existing.best.priceNative) {
+            existing.best = data.price;
+          }
           if (data.bundles && data.bundles.length) {
             existing.bundles = data.bundles;
           }
