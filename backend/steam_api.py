@@ -573,13 +573,42 @@ def get_appdetails_full(appid, lang="es"):
             hls  = mov.get("hls_h264") or ""
             mp4  = mov.get("mp4")  if isinstance(mov.get("mp4"),  dict) else {}
             webm = mov.get("webm") if isinstance(mov.get("webm"), dict) else {}
+
+            # Exponemos todas las fuentes disponibles para que el frontend
+            # ofrezca selector de calidad (low=480, high=max). HLS es
+            # adaptativo, asi que si esta disponible, el frontend no muestra selector.
+            sources = {}
+            hls_url = hls if isinstance(hls, str) and hls.startswith("http") else ""
+            if hls_url:
+                sources["hls"] = hls_url
+            if mp4.get("480"):
+                sources["mp4_low"] = mp4["480"]
+            if mp4.get("max"):
+                sources["mp4_high"] = mp4["max"]
+            if webm.get("480"):
+                sources["webm_low"] = webm["480"]
+            if webm.get("max"):
+                sources["webm_high"] = webm["max"]
+
+            # `src` por compat: HLS > MP4 480 > MP4 max > WebM 480 > WebM max.
             src = (
-                hls if isinstance(hls, str) and hls.startswith("http") else ""
-            ) or mp4.get("480") or mp4.get("max") or webm.get("480") or webm.get("max") or ""
+                hls_url
+                or sources.get("mp4_low")
+                or sources.get("mp4_high")
+                or sources.get("webm_low")
+                or sources.get("webm_high")
+                or ""
+            )
             thumb = mov.get("thumbnail", "") if isinstance(mov.get("thumbnail"), str) else ""
             if src:
                 vtype = "hls" if src.endswith(".m3u8") else "video"
-                media.append({"type": vtype, "src": src, "thumb": thumb, "title": mov.get("name", "")})
+                media.append({
+                    "type": vtype,
+                    "src": src,
+                    "sources": sources,
+                    "thumb": thumb,
+                    "title": mov.get("name", ""),
+                })
 
         # Screenshots
         for ss in (d.get("screenshots") or [])[:8]:

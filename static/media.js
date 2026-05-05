@@ -6,6 +6,7 @@ var _mediaIdx   = 0;
 var _mediaViewerHls = null;
 var _mediaTheaterKeyHandler = null;
 var _mediaTheaterHls = null;
+var _mediaTheaterReturnFocus = null;
 var _mediaFullscreenEventsBound = false;
 
 function _isVideoMedia(item){
@@ -197,6 +198,48 @@ function _buildCustomVideoPlayer(item, options){
   volume.value = '1';
   controls.appendChild(volume);
 
+  // Selector de calidad (solo cuando hay par 480/max y no estamos usando HLS adaptativo).
+  var sources = item.sources || {};
+  var hasHls = !!sources.hls && (typeof Hls !== 'undefined' && Hls.isSupported());
+  var qualityPair = null;
+  if(!hasHls){
+    if(sources.mp4_low && sources.mp4_high){
+      qualityPair = { low: sources.mp4_low, high: sources.mp4_high };
+    } else if(sources.webm_low && sources.webm_high){
+      qualityPair = { low: sources.webm_low, high: sources.webm_high };
+    }
+  }
+  var currentQuality = 'low';  // default 480 por bandwidth; usuario puede subir a HD
+  var qualityBtn = null;
+  if(qualityPair){
+    qualityBtn = document.createElement('button');
+    qualityBtn.className = 'media-video-btn media-video-quality';
+    qualityBtn.type = 'button';
+    qualityBtn.textContent = 'HD';
+    var qualityLabel = _mediaText('mediaQualityHD', 'Toggle HD quality');
+    qualityBtn.title = qualityLabel;
+    qualityBtn.setAttribute('aria-label', qualityLabel);
+    qualityBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var time = vid.currentTime;
+      var wasPaused = vid.paused;
+      currentQuality = (currentQuality === 'high') ? 'low' : 'high';
+      qualityBtn.classList.toggle('is-active', currentQuality === 'high');
+
+      // Reemplaza la fuente y restaura tiempo + estado de play.
+      vid.src = qualityPair[currentQuality];
+      vid.load();
+      var onMeta = function(){
+        vid.removeEventListener('loadedmetadata', onMeta);
+        try { vid.currentTime = time; } catch(err) {}
+        if(!wasPaused) vid.play().catch(function(){});
+      };
+      vid.addEventListener('loadedmetadata', onMeta);
+      showControls();
+    });
+    controls.appendChild(qualityBtn);
+  }
+
   wrap.appendChild(controls);
 
   function setNavIdle(idle){
@@ -299,13 +342,64 @@ function _buildCustomVideoPlayer(item, options){
   vid.addEventListener('volumechange', updateVolumeState);
   wrap.addEventListener('mousemove', showControls);
   wrap.addEventListener('touchstart', showControls, {passive: true});
-  wrap.addEventListener('keydown', showControls);
+
+  // Atajos de teclado nativos (compensa la perdida del atributo `controls`).
+  // Ignoramos cuando el foco esta en un boton o slider para no pisar su comportamiento nativo.
+  wrap.tabIndex = 0;
+  wrap.addEventListener('keydown', function(e){
+    showControls();
+    var tag = (e.target && e.target.tagName ? e.target.tagName : '').toUpperCase();
+    if(tag === 'BUTTON' || tag === 'INPUT') return;
+    var handled = true;
+    switch(e.key){
+      case ' ':
+      case 'k':
+      case 'K':
+        if(vid.paused) vid.play().catch(function(){}); else vid.pause();
+        break;
+      case 'ArrowLeft':
+        vid.currentTime = Math.max(0, (vid.currentTime || 0) - 5);
+        break;
+      case 'ArrowRight':
+        vid.currentTime = Math.min(vid.duration || 0, (vid.currentTime || 0) + 5);
+        break;
+      case 'ArrowUp':
+        vid.volume = Math.min(1, (vid.volume || 0) + 0.1);
+        vid.muted = false;
+        updateVolumeState();
+        break;
+      case 'ArrowDown':
+        vid.volume = Math.max(0, (vid.volume || 0) - 0.1);
+        updateVolumeState();
+        break;
+      case 'm':
+      case 'M':
+        vid.muted = !vid.muted;
+        updateVolumeState();
+        break;
+      case 'f':
+      case 'F':
+        var fsTarget = wrap.closest('.media-theater') || wrap.closest('.media-viewer') || wrap;
+        _toggleFullscreen(fsTarget);
+        break;
+      default:
+        handled = false;
+    }
+    if(handled){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+
   controls.addEventListener('mouseenter', function(){ clearTimeout(hideControlsTimer); });
   controls.addEventListener('mouseleave', scheduleControlsHide);
   controls.addEventListener('focusin', function(){ clearTimeout(hideControlsTimer); wrap.classList.remove('controls-hidden'); });
   controls.addEventListener('focusout', scheduleControlsHide);
 
-  var hls = _attachVideoSource(vid, item, !!options.autoplay);
+  // Si hay quality pair (no HLS), forzamos arranque en low para evitar
+  // que `item.src` (que puede ser HLS no soportado) llegue al video tag.
+  var attachItem = qualityPair ? { type: 'video', src: qualityPair[currentQuality] } : item;
+  var hls = _attachVideoSource(vid, attachItem, !!options.autoplay);
   if(options.onHls) options.onHls(hls);
   updatePlayState();
   updateVolumeState();
@@ -439,6 +533,9 @@ function openMediaTheater(idx){
 
   closeMediaTheater();
 
+  // Guardar el elemento que tenia foco antes de abrir, para restaurarlo al cerrar.
+  _mediaTheaterReturnFocus = document.activeElement;
+
   var overlay = document.createElement('div');
   overlay.className = 'media-theater';
   overlay.id = 'media-theater';
@@ -447,6 +544,7 @@ function openMediaTheater(idx){
 
   var bar = document.createElement('div');
   bar.className = 'media-theater-bar';
+  bar.addEventListener('click', function(e){ e.stopPropagation(); });
   var title = document.createElement('div');
   title.className = 'media-theater-title';
   var gameTitle = document.getElementById('game-title');
@@ -456,11 +554,11 @@ function openMediaTheater(idx){
 
   var stage = document.createElement('div');
   stage.className = 'media-theater-stage';
-  stage.addEventListener('click', function(e){ e.stopPropagation(); });
   overlay.appendChild(stage);
 
   var footer = document.createElement('div');
   footer.className = 'media-theater-footer';
+  footer.addEventListener('click', function(e){ e.stopPropagation(); });
   overlay.appendChild(footer);
 
   var closeBtn = document.createElement('button');
@@ -547,12 +645,48 @@ function openMediaTheater(idx){
     e.stopPropagation();
     moveMedia(1);
   });
-  overlay.addEventListener('click', closeMediaTheater);
+  // Cierra solo si el click es sobre area vacia (overlay padding, letterbox del stage,
+  // o area vacia del video player). Los media reales y los controles tienen sus propios
+  // stopPropagation o no estan en la lista de close.
+  overlay.addEventListener('click', function(e){
+    var target = e.target;
+    if(target === overlay || target === stage){
+      closeMediaTheater();
+      return;
+    }
+    if(target.classList && target.classList.contains('media-video-player')){
+      closeMediaTheater();
+    }
+  });
 
   _mediaTheaterKeyHandler = function(e){
-    if(e.key === 'Escape') closeMediaTheater();
-    if(e.key === 'ArrowLeft') moveMedia(-1);
-    if(e.key === 'ArrowRight') moveMedia(1);
+    if(e.key === 'Escape') { closeMediaTheater(); return; }
+
+    // ArrowLeft/Right navegan entre media, excepto si el foco esta dentro
+    // del video player (donde esas teclas hacen seek o ajustan slider).
+    var active = document.activeElement;
+    var inVideoPlayer = active && active.closest && active.closest('.media-video-player');
+    if(!inVideoPlayer){
+      if(e.key === 'ArrowLeft') { moveMedia(-1); return; }
+      if(e.key === 'ArrowRight') { moveMedia(1); return; }
+    }
+
+    // Focus trap: mantener el foco dentro del overlay con Tab.
+    if(e.key === 'Tab'){
+      var focusables = overlay.querySelectorAll('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])');
+      var visible = [];
+      focusables.forEach(function(el){ if(el.offsetParent !== null) visible.push(el); });
+      if(!visible.length) return;
+      var first = visible[0];
+      var last = visible[visible.length - 1];
+      if(e.shiftKey && (active === first || !overlay.contains(active))){
+        e.preventDefault();
+        last.focus();
+      } else if(!e.shiftKey && (active === last || !overlay.contains(active))){
+        e.preventDefault();
+        first.focus();
+      }
+    }
   };
   document.addEventListener('keydown', _mediaTheaterKeyHandler);
 
@@ -572,6 +706,11 @@ function closeMediaTheater(){
     document.removeEventListener('keydown', _mediaTheaterKeyHandler);
     _mediaTheaterKeyHandler = null;
   }
+  // Restaurar foco al elemento que abrio el theater (a11y).
+  if(_mediaTheaterReturnFocus && typeof _mediaTheaterReturnFocus.focus === 'function'){
+    try { _mediaTheaterReturnFocus.focus(); } catch(e) {}
+  }
+  _mediaTheaterReturnFocus = null;
 }
 
 // ── Render panel completo ───────────────────────────────────────
@@ -617,6 +756,24 @@ function renderMediaPanel(media){
       thumb.appendChild(img2);
     }
     thumb.addEventListener('click', function(){ selectMedia(i); });
+
+    // A11y: Tab navega la ruleta de thumbnails (focus = preview en el viewer);
+    // Enter / Space abre el media en el theater (fullscreen).
+    thumb.tabIndex = 0;
+    thumb.setAttribute('role', 'button');
+    var thumbLabel = (item.title && String(item.title).trim()) || _mediaText('mediaThumb', 'Media') + ' ' + (i + 1);
+    thumb.setAttribute('aria-label', thumbLabel);
+    thumb.addEventListener('focus', function(){
+      if(_mediaIdx !== i) selectMedia(i);
+    });
+    thumb.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        selectMedia(i);
+        openMediaTheater(i);
+      }
+    });
+
     scroll.appendChild(thumb);
   });
   panel.appendChild(scroll);
