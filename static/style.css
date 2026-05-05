@@ -106,14 +106,14 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .media-video-progress{min-width:120px;}
 .media-video-volume{min-width:64px;}
 .media-actions{position:absolute;right:16px;bottom:14px;display:flex;gap:8px;z-index:3;}
-.media-action-btn{position:relative;width:38px;height:32px;border:0;border-radius:6px;background:rgba(0,0,0,.38);backdrop-filter:blur(4px);cursor:pointer;transition:background .18s,transform .18s;}
-.media-action-btn:hover{background:rgba(0,0,0,.66);transform:translateY(-1px);}
-.media-action-theater::before{content:'';position:absolute;left:9px;right:9px;top:10px;bottom:10px;border:2px solid #fff;border-radius:2px;transition:border-color .18s,box-shadow .18s;}
-.media-action-theater:hover::before{border-color:var(--accent);box-shadow:0 0 8px rgba(0,255,135,.35);}
-.media-action-fullscreen::before{content:'';position:absolute;inset:7px;background:linear-gradient(#fff,#fff) left top/9px 2px no-repeat,linear-gradient(#fff,#fff) left top/2px 9px no-repeat,linear-gradient(#fff,#fff) right top/9px 2px no-repeat,linear-gradient(#fff,#fff) right top/2px 9px no-repeat,linear-gradient(#fff,#fff) left bottom/9px 2px no-repeat,linear-gradient(#fff,#fff) left bottom/2px 9px no-repeat,linear-gradient(#fff,#fff) right bottom/9px 2px no-repeat,linear-gradient(#fff,#fff) right bottom/2px 9px no-repeat;transition:filter .18s;}
+.media-action-btn{position:relative;width:38px;height:32px;border:0;border-radius:6px;background:rgba(8,18,14,.55);border:1px solid rgba(0,255,135,.18);backdrop-filter:blur(4px);color:rgba(0,255,135,.78);cursor:pointer;transition:background .18s,border-color .18s,color .18s,transform .18s;}
+.media-action-btn:hover{background:rgba(0,255,135,.16);border-color:rgba(0,255,135,.45);color:var(--accent);transform:translateY(-1px);}
+.media-action-theater::before{content:'';position:absolute;left:9px;right:9px;top:10px;bottom:10px;border:2px solid currentColor;border-radius:2px;transition:box-shadow .18s;}
+.media-action-theater:hover::before{box-shadow:0 0 8px rgba(0,255,135,.35);}
+.media-action-fullscreen::before{content:'';position:absolute;inset:7px;background:linear-gradient(currentColor,currentColor) left top/9px 2px no-repeat,linear-gradient(currentColor,currentColor) left top/2px 9px no-repeat,linear-gradient(currentColor,currentColor) right top/9px 2px no-repeat,linear-gradient(currentColor,currentColor) right top/2px 9px no-repeat,linear-gradient(currentColor,currentColor) left bottom/9px 2px no-repeat,linear-gradient(currentColor,currentColor) left bottom/2px 9px no-repeat,linear-gradient(currentColor,currentColor) right bottom/9px 2px no-repeat,linear-gradient(currentColor,currentColor) right bottom/2px 9px no-repeat;transition:filter .18s;}
 .media-action-fullscreen:hover::before{filter:drop-shadow(0 0 5px var(--accent));}
-.media-action-fullscreen.is-active::before{inset:8px;background:linear-gradient(#fff,#fff) center top/12px 2px no-repeat,linear-gradient(#fff,#fff) center bottom/12px 2px no-repeat,linear-gradient(#fff,#fff) left center/2px 12px no-repeat,linear-gradient(#fff,#fff) right center/2px 12px no-repeat;}
-.media-action-fullscreen.is-active::after{content:'';position:absolute;inset:11px;border:2px solid #fff;border-radius:2px;}
+.media-action-fullscreen.is-active::before{inset:8px;background:linear-gradient(currentColor,currentColor) center top/12px 2px no-repeat,linear-gradient(currentColor,currentColor) center bottom/12px 2px no-repeat,linear-gradient(currentColor,currentColor) left center/2px 12px no-repeat,linear-gradient(currentColor,currentColor) right center/2px 12px no-repeat;}
+.media-action-fullscreen.is-active::after{content:'';position:absolute;inset:11px;border:2px solid currentColor;border-radius:2px;}
 .media-viewer-nav{display:flex;position:absolute;top:50%;width:58px;height:92px;border:0;background:transparent;color:rgba(255,255,255,.72);cursor:pointer;z-index:4;align-items:center;justify-content:center;transform:translateY(-50%);opacity:0;transition:color .18s,background .18s,opacity .22s ease;}
 .media-viewer:hover .media-viewer-nav,
 .media-viewer:focus-within .media-viewer-nav{opacity:1;}
