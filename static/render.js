@@ -66,8 +66,20 @@ function renderResults(data,gameName){
       row.appendChild(l); row.appendChild(v); gip.appendChild(row);
     }
     if(gi.description){
+      var descWrap=document.createElement('div'); descWrap.className='gi-desc-wrap';
       var desc=document.createElement('div'); desc.className='gi-desc'; desc.textContent=gi.description;
-      gip.appendChild(desc);
+      var toggle=document.createElement('button'); toggle.type='button'; toggle.className='gi-desc-toggle';
+      toggle.textContent=t('seeMore'); toggle.style.display='none';
+      toggle.addEventListener('click', function(){
+        var expanded=desc.classList.toggle('expanded');
+        toggle.textContent=expanded ? t('seeLess') : t('seeMore');
+      });
+      descWrap.appendChild(desc); descWrap.appendChild(toggle);
+      gip.appendChild(descWrap);
+      // Mostrar el toggle solo si la descripcion esta clampeada (no cabe en 5 lineas).
+      setTimeout(function(){
+        if(desc.scrollHeight > desc.clientHeight + 1) toggle.style.display='';
+      }, 0);
     }
     if(gi.platforms && gi.platforms.length){
       var pr=document.createElement('div'); pr.className='gi-row';
