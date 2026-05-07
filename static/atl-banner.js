@@ -1,9 +1,17 @@
-// atl-banner.js — All-Time Low slider (1 juego a la vez, full-width, navegacion con flechas)
+// atl-banner.js — All-Time Low slider full-width estilo Steam.
+// Loop infinito con clones (sin rewind al ir last->first) + auto-rotate 10s
+// con pausa en hover/focus.
 
 (function(){
   var ATL_LIMIT = 5;
-  var _atlIdx = 0;
+  var AUTO_MS = 10000;
+  var TRANSITION_MS = 450;
+
   var _atlGames = [];
+  var _atlIdx = 0;          // indice logico 0..n-1 (lo que muestran los dots)
+  var _atlPhysIdx = 1;      // posicion fisica en el track con clones (0=clone last, 1..n=reales, n+1=clone first)
+  var _autoTimer = null;
+  var _animating = false;
 
   function getCurrency(){
     return (typeof currentCurrency !== "undefined" && currentCurrency) ? currentCurrency : "COP";
@@ -26,8 +34,12 @@
     }
   }
 
-  function buildSlide(g, i, tagLabel){
-    var html = "<div class='atl-slide' onclick='atlSlideClick(" + i + ")' data-idx='" + i + "'>";
+  function buildSlide(g, i, tagLabel, isClone){
+    // Los clones no son interactivos: misma vista pero sin click ni focus
+    var attrs = isClone
+      ? " aria-hidden='true' tabindex='-1'"
+      : " onclick='atlSlideClick(" + i + ")' tabindex='0'";
+    var html = "<div class='atl-slide" + (isClone?" atl-clone":"") + "'" + attrs + " data-idx='" + i + "'>";
     if (g.cover) {
       var fbAttr = g.coverFallback && g.coverFallback !== g.cover
         ? " data-fallback='" + esc(g.coverFallback) + "'"
@@ -60,23 +72,37 @@
   function renderAtlBanner(games){
     _atlGames = games;
     _atlIdx = 0;
+    _atlPhysIdx = 1;            // primera real (despues del clone prependeado)
+    _animating = false;
+
     var el = document.getElementById("atl-banner");
     if (!el) return;
+    var n = games.length;
 
     var headerLabel = (typeof t === "function" && t("atlTodayTitle")) || "ALL-TIME LOW HOY";
-    var tagLabel = (typeof t === "function" && t("atlTagShort")) || "ALL-TIME LOW";
+    var tagLabel    = (typeof t === "function" && t("atlTagShort"))   || "ALL-TIME LOW";
 
     var slidesHtml = "";
-    for (var i = 0; i < games.length; i++) {
-      slidesHtml += buildSlide(games[i], i, tagLabel);
+    // Clone al inicio (copia de la ultima) para wrap "prev" suave
+    if (n > 1) slidesHtml += buildSlide(games[n - 1], n - 1, tagLabel, true);
+    for (var i = 0; i < n; i++) {
+      slidesHtml += buildSlide(games[i], i, tagLabel, false);
     }
+    // Clone al final (copia de la primera) para wrap "next" suave
+    if (n > 1) slidesHtml += buildSlide(games[0], 0, tagLabel, true);
 
     var dotsHtml = "<div class='atl-dots' role='tablist' aria-label='ATL banner pagination'>";
-    for (var k = 0; k < games.length; k++) {
+    for (var k = 0; k < n; k++) {
       dotsHtml += "<button type='button' class='atl-dot" + (k===0?" active":"")
         + "' onclick='atlGoTo(" + k + ")' aria-label='Slide " + (k+1) + "'></button>";
     }
     dotsHtml += "</div>";
+
+    var navHtml = "";
+    if (n > 1) {
+      navHtml = "<button type='button' class='atl-nav atl-nav-prev' onclick='atlPrev()' aria-label='Previous'>&#x2039;</button>"
+              + "<button type='button' class='atl-nav atl-nav-next' onclick='atlNext()' aria-label='Next'>&#x203a;</button>";
+    }
 
     var html = "<div class='atl-header'>"
       + "<span class='pa-icon pa-icon-fire'></span>"
@@ -84,37 +110,135 @@
       + "</div>"
       + "<div class='atl-slider'>"
       +   "<div class='atl-track' id='atl-track'>" + slidesHtml + "</div>"
-      +   "<button type='button' class='atl-nav atl-nav-prev' onclick='atlPrev()' aria-label='Previous'>&#x2039;</button>"
-      +   "<button type='button' class='atl-nav atl-nav-next' onclick='atlNext()' aria-label='Next'>&#x203a;</button>"
+      +   navHtml
       +   dotsHtml
       + "</div>";
 
     el.innerHTML = html;
     el.style.display = "block";
 
-    // Teclado: flechas izq/der cuando el banner tiene foco interno
-    el.addEventListener("keydown", function(e){
-      if (e.key === "ArrowLeft") { e.preventDefault(); atlPrev(); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); atlNext(); }
-    });
+    // Posicion inicial: primera slide real (saltando el clone prependeado)
+    var track = document.getElementById("atl-track");
+    if (track) {
+      track.style.transition = "none";
+      track.style.transform = "translateX(-" + (_atlPhysIdx * 100) + "%)";
+      // Force reflow para que el siguiente cambio de transform sí anime
+      void track.offsetHeight;
+      track.style.transition = "";
+    }
+
+    // Hover/focus pause + arranque del auto-rotate (solo si hay >1 slide)
+    var slider = el.querySelector(".atl-slider");
+    if (slider && n > 1) {
+      slider.addEventListener("mouseenter", stopAuto);
+      slider.addEventListener("mouseleave", startAuto);
+      slider.addEventListener("focusin", stopAuto);
+      slider.addEventListener("focusout", startAuto);
+      slider.addEventListener("keydown", function(e){
+        if (e.key === "ArrowLeft") { e.preventDefault(); atlPrev(); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); atlNext(); }
+      });
+      startAuto();
+    }
   }
 
-  // ── Navegacion ───────────────────────────────────────────────
-  window.atlGoTo = function(idx){
-    if (!_atlGames.length) return;
-    var n = _atlGames.length;
-    _atlIdx = ((idx % n) + n) % n;
+  // ── Animacion + jump (truco del clone) ────────────────────────
+  function animateTo(physIdx, logicalIdx, postCb){
+    if (_animating) return;
     var track = document.getElementById("atl-track");
-    if (track) track.style.transform = "translateX(-" + (_atlIdx * 100) + "%)";
+    if (!track) return;
+    _animating = true;
+    track.style.transition = "transform .45s cubic-bezier(.22,.61,.36,1)";
+    _atlPhysIdx = physIdx;
+    _atlIdx = logicalIdx;
+    track.style.transform = "translateX(-" + (physIdx * 100) + "%)";
+    updateDots();
+    setTimeout(function(){
+      _animating = false;
+      if (postCb) postCb();
+    }, TRANSITION_MS);
+  }
+
+  function jumpTo(physIdx){
+    var track = document.getElementById("atl-track");
+    if (!track) return;
+    track.style.transition = "none";
+    _atlPhysIdx = physIdx;
+    track.style.transform = "translateX(-" + (physIdx * 100) + "%)";
+    void track.offsetHeight;     // reflow
+    track.style.transition = "";
+  }
+
+  function updateDots(){
     var dots = document.querySelectorAll("#atl-banner .atl-dot");
     for (var i = 0; i < dots.length; i++) {
       dots[i].classList.toggle("active", i === _atlIdx);
     }
-  };
-  window.atlPrev = function(){ atlGoTo(_atlIdx - 1); };
-  window.atlNext = function(){ atlGoTo(_atlIdx + 1); };
+  }
 
-  // Fallback de imagen: library_hero -> ITAD banner -> hide
+  // ── Navegacion publica ────────────────────────────────────────
+  window.atlNext = function(){
+    if (_animating) return;
+    var n = _atlGames.length;
+    if (n < 2) return;
+    var nextLogical = (_atlIdx + 1) % n;
+    var nextPhys = _atlPhysIdx + 1;
+    animateTo(nextPhys, nextLogical, function(){
+      // Si caimos en el clone post-final, saltar (sin animacion) a la primera real
+      if (nextPhys === n + 1) jumpTo(1);
+    });
+  };
+
+  window.atlPrev = function(){
+    if (_animating) return;
+    var n = _atlGames.length;
+    if (n < 2) return;
+    var prevLogical = (_atlIdx - 1 + n) % n;
+    var prevPhys = _atlPhysIdx - 1;
+    animateTo(prevPhys, prevLogical, function(){
+      // Si caimos en el clone pre-primera, saltar (sin animacion) a la ultima real
+      if (prevPhys === 0) jumpTo(n);
+    });
+  };
+
+  window.atlGoTo = function(idx){
+    if (_animating) return;
+    var n = _atlGames.length;
+    if (!n) return;
+    var target = ((idx % n) + n) % n;
+    if (target === _atlIdx) return;
+    // Camino mas corto via clones: si forward es mas corto, ir forward; si backward, ir backward.
+    // Esto evita el "barrido largo" cuando se salta de la 4 a la 0 (1 paso forward via clone) etc.
+    var forwardSteps  = (target - _atlIdx + n) % n;
+    var backwardSteps = (_atlIdx - target + n) % n;
+    if (forwardSteps <= backwardSteps) {
+      var newPhys = _atlPhysIdx + forwardSteps;
+      animateTo(newPhys, target, function(){
+        if (newPhys >= n + 1) jumpTo(target + 1);
+      });
+    } else {
+      var newPhys2 = _atlPhysIdx - backwardSteps;
+      animateTo(newPhys2, target, function(){
+        if (newPhys2 <= 0) jumpTo(target + 1);
+      });
+    }
+  };
+
+  // ── Auto-rotate ───────────────────────────────────────────────
+  function startAuto(){
+    var n = _atlGames.length;
+    if (n < 2) return;
+    stopAuto();
+    _autoTimer = setTimeout(function(){
+      atlNext();
+      startAuto();           // proxima en 10s desde el avance
+    }, AUTO_MS);
+  }
+  function stopAuto(){
+    if (_autoTimer) { clearTimeout(_autoTimer); _autoTimer = null; }
+  }
+
+  // ── Fallback de imagen y click handlers ──────────────────────
   window.atlImgFallback = function(img){
     if (!img) return;
     var fb = img.getAttribute("data-fallback");
@@ -126,7 +250,6 @@
     }
   };
 
-  // Click → setear input + dispara busqueda directa (skip autocomplete)
   window.atlSlideClick = function(i){
     var g = _atlGames[i];
     if (!g) return;
@@ -151,7 +274,7 @@
     }, 200);
   };
 
-  // Hook publico para refetch al cambiar currency / lang
+  // Hook publico
   window.reloadAtlBanner = loadAtlBanner;
 
   document.addEventListener("DOMContentLoaded", function(){
