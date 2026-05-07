@@ -230,6 +230,9 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 /* Hero overlay y grid en pantallas medias-pequeñas: stack column en hero, 1 col en grid. */
 @media(max-width:640px){
   .game-card-hero{height:auto;min-height:220px;}
+  /* `contain` para que la imagen del cover (library_hero ~3.1:1) se vea completa
+     dentro de la caja sin recortarse al cambiar el aspect ratio en mobile. */
+  .game-card-hero-img{object-fit:contain;}
   .game-card-hero-overlay{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:12px;padding:18px 20px;}
   .price-main{font-size:1.9rem;}
   .store-name{font-size:1.2rem;}
