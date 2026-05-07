@@ -1,6 +1,7 @@
 # routes/atl.py — All-Time Low banner (juegos en precio historico minimo hoy)
 
 import time
+import concurrent.futures
 import requests
 from flask import Blueprint, jsonify, request
 
@@ -56,17 +57,15 @@ def _build_game(entry, currency, usd_rate, rates):
     price_amt = price_info.get("amount", 0)
     reg_amt = regular_info.get("amount", price_amt)
 
-    # Permitimos price=0 (juegos gratis) pero requerimos un regular > 0 para
-    # que el descuento tenga sentido.
     if reg_amt <= 0:
         return None
 
     price_cur = price_info.get("currency", "USD")
 
     assets = entry.get("assets") or {}
-    cover = (
-        assets.get("banner400")
-        or assets.get("banner600")
+    cover_fallback = (
+        assets.get("banner600")
+        or assets.get("banner400")
         or assets.get("banner300")
         or assets.get("boxart")
         or ""
@@ -77,7 +76,9 @@ def _build_game(entry, currency, usd_rate, rates):
     return {
         "title":          entry.get("title", ""),
         "slug":           entry.get("slug", ""),
-        "cover":          cover,
+        "appid":          "",                # se rellena en _enrich_with_appids
+        "cover":          cover_fallback,    # default a banner ITAD; reemplazado si hay appid
+        "coverFallback":  cover_fallback,
         "store":          shop.get("name", ""),
         "storeId":        str(shop.get("id", "")).lower(),
         "priceNative":    round(_convert(price_amt, price_cur, currency, usd_rate, rates), 2),
@@ -87,6 +88,50 @@ def _build_game(entry, currency, usd_rate, rates):
         "url":            deal.get("url", "#"),
         "isAtl":          _is_atl(deal),
     }
+
+
+def _fetch_game_info(itad_id):
+    """Lookup de un juego en ITAD para sacar Steam appid. Retorna {} si falla."""
+    try:
+        r = requests.get(
+            "https://api.isthereanydeal.com/games/info/v2",
+            params={"key": ITAD_API_KEY, "id": itad_id},
+            timeout=8,
+        )
+        if r.status_code == 200:
+            data = r.json() or {}
+            appid = data.get("appid")
+            return {"appid": str(appid)} if appid else {}
+    except Exception:
+        pass
+    return {}
+
+
+def _enrich_with_appids(pairs):
+    """
+    Lookup paralelo de Steam appid para upgrade de cover a library_hero.jpg
+    (1920x620, mucho mejor calidad que el banner600 de ITAD para banner full-width).
+    pairs = [(game_dict, itad_id), ...]
+    Muta los game_dict in-place agregando appid + cover Steam.
+    """
+    if not pairs:
+        return
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
+        futures = {ex.submit(_fetch_game_info, gid): g for g, gid in pairs}
+        for future in concurrent.futures.as_completed(futures):
+            g = futures[future]
+            try:
+                info = future.result()
+                appid = info.get("appid")
+                if appid:
+                    g["appid"] = appid
+                    g["cover"] = (
+                        f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/library_hero.jpg"
+                    )
+                    # coverFallback ya viene del banner ITAD; si library_hero 404ea
+                    # el frontend revierte al banner ITAD via onerror.
+            except Exception:
+                pass
 
 
 @bp_atl.route("/api/atl-today")
@@ -114,16 +159,20 @@ def api_atl_today():
         items = _fetch_deals(cc, with_filter=False)
 
     games = []
+    pairs = []
     for entry in items:
         g = _build_game(entry, currency, usd_rate, rates)
         if not g or not g["title"]:
             continue
         games.append(g)
+        pairs.append((g, entry["id"]))
         if len(games) >= 20:
             break
 
-    # Preferir los que están en historical low. Si hay >=5 ATL los promovemos al
-    # frente; si no, dejamos el orden por descuento.
+    # Lookup paralelo de Steam appid → upgrade cover a library_hero
+    _enrich_with_appids(pairs)
+
+    # Preferir ATL al frente
     atl_games = [g for g in games if g["isAtl"]]
     if len(atl_games) >= 5:
         games = atl_games + [g for g in games if not g["isAtl"]]
