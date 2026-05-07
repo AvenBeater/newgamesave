@@ -49,7 +49,7 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .game-card{background:linear-gradient(135deg,rgba(0,255,135,.08) 0%,rgba(0,255,135,.02) 100%);border:1px solid rgba(0,255,135,.3);border-radius:20px;margin-bottom:28px;display:none;overflow:hidden;transition:border-color .3s ease;}
 .game-card.visible{animation:fadeUp .4s ease both;}
 /* Portada: banner full-width arriba con overlay de info de precio */
-.game-card-hero{position:relative;width:100%;height:260px;overflow:hidden;background:var(--surface2);}
+.game-card-hero{position:relative;width:100%;height:260px;overflow:hidden;background:var(--surface2);border-bottom:1px solid var(--accent);}
 .game-card-hero-img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.6);transition:transform .5s ease,filter .5s ease;}
 .game-card:hover .game-card-hero-img{transform:scale(1.03);filter:brightness(.7);}
 .game-card-hero-overlay{position:absolute;inset:0;display:flex;align-items:flex-end;padding:24px 28px;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 60%);}
@@ -197,11 +197,15 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .store-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
 .store-dot{width:8px;height:8px;border-radius:50%;background:var(--store-color);flex-shrink:0;}
 .discount-badge{background:var(--accent2);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;font-family:'Syne',sans-serif;animation:popIn .3s ease both;}
-.card-price{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.card-price{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text);margin-bottom:6px;}
 .card-original{text-decoration:line-through;color:var(--muted);font-size:13px;margin-bottom:12px;}
 .btn-buy{display:block;width:100%;text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:10px;border-radius:8px;font-size:12px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:1px;transition:all .2s;cursor:pointer;}
 .btn-buy:hover{background:var(--store-color,var(--accent));color:#000;border-color:transparent;}
 .lang-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:100px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--muted);letter-spacing:1px;margin-left:auto;flex-shrink:0;}
+
+/* Botón pegado al fondo en grid view: cards se estiran a la altura de la fila y el botón alinea entre cards. List view y table intactos. */
+.price-grid:not(.view-list):not(.view-table) .price-card{display:flex;flex-direction:column;}
+.price-grid:not(.view-list):not(.view-table) .price-card .btn-buy{margin-top:auto;}
 .price-grid.view-list{grid-template-columns:1fr;gap:8px;}
 .price-grid.view-list .price-card{display:flex;align-items:center;padding:14px 20px;gap:16px;border-radius:10px;}
 .price-grid.view-list .price-card::before{top:0;bottom:0;right:auto;width:3px;height:auto;border-radius:10px 0 0 10px;}
@@ -210,7 +214,7 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .price-grid.view-list .card-original{margin-bottom:0;}
 .price-grid.view-list .price-info{display:flex;align-items:center;gap:12px;flex:1;flex-wrap:wrap;}
 .price-grid.view-list .btn-buy{width:auto;padding:8px 20px;white-space:nowrap;margin-left:auto;flex-shrink:0;}
-.price-grid.view-table{display:block;}
+.price-grid.view-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .price-table{width:100%;border-collapse:collapse;font-size:13px;}
 .price-table thead tr{border-bottom:2px solid var(--accent);}
 .price-table th{text-align:left;padding:10px 16px;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;font-weight:400;}
@@ -222,6 +226,65 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .table-original{text-decoration:line-through;color:var(--muted);font-size:12px;margin-left:8px;}
 .table-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:6px 14px;border-radius:6px;font-size:11px;font-family:'Syne',sans-serif;font-weight:700;transition:all .15s;white-space:nowrap;}
 .table-btn:hover{background:var(--accent);color:#000;border-color:transparent;}
+
+/* Hero box fijo + grid 1col en pantallas medias-pequeñas. */
+@media(max-width:640px){
+  /* Hero: box 220px fijo. La imagen ocupa el espacio entero con `object-fit:contain`
+     (visible al 100% sin recorte; bg surface2 rellena los lados sobrantes cuando
+     el aspect del cover no coincide con el del box). El overlay vuelve a ser
+     absolute on top con gradient oscuro que se concentra en la parte inferior
+     para asegurar la legibilidad del texto sin tapar el centro de la imagen. */
+  .game-card-hero{
+    height:220px;min-height:0;
+    position:relative;
+    background:var(--surface2);
+  }
+  .game-card-hero-img{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    display:block;
+    object-fit:cover;filter:none;
+  }
+  .game-card-hero-overlay{
+    position:absolute;inset:0;
+    flex-direction:column;align-items:flex-start;justify-content:flex-end;
+    gap:10px;padding:16px 20px;
+    background:
+      linear-gradient(to bottom, rgba(0,0,0,.88) 0%, rgba(0,0,0,.45) 35%, transparent 65%),
+      linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.45) 35%, transparent 65%);
+  }
+  .price-main{font-size:1.7rem;}
+  .store-name{font-size:1.1rem;}
+  .best-deal-btn{margin-left:0;align-self:flex-start;padding:8px 16px;font-size:12px;}
+  .best-deal-tag{font-size:9px;letter-spacing:2px;top:10px;right:14px;}
+  /* Grid view: forzar 1 columna para que las cards tengan ancho completo y el btn-buy no se recorte por contenido apretado. */
+  .price-grid:not(.view-list):not(.view-table){grid-template-columns:1fr;}
+  .price-grid:not(.view-list):not(.view-table) .price-card{padding:16px;}
+  .price-card .card-price{font-size:1.3rem;}
+}
+
+/* Search list / table mobile: ajustar precios y cells para que quepan en pantallas pequeñas. */
+@media(max-width:540px){
+  /* List view: 2-row layout — store ocupa fila completa, price-info + boton fila inferior. */
+  .price-grid.view-list .price-card{flex-wrap:wrap;padding:10px 14px;gap:8px;}
+  .price-grid.view-list .card-store{flex:1 1 100%;min-width:0;}
+  .price-grid.view-list .price-info{flex:1 1 auto;gap:8px;font-size:.95rem;}
+  .price-grid.view-list .card-price{font-size:1rem;}
+  .price-grid.view-list .card-original{font-size:11px;}
+  .price-grid.view-list .btn-buy{padding:6px 16px;font-size:11px;}
+  /* Table view: padding y font compactos para fit en mobile sin desbordar el body.
+     Lang-tag oculto y store name truncado para garantizar que la columna de
+     accion (boton VER) entre en pantalla sin recortarse. */
+  .price-table{font-size:11px;}
+  .price-table th{padding:8px 4px;letter-spacing:1px;}
+  .price-table td{padding:10px 4px;}
+  .price-table .lang-tag{display:none;}
+  .table-store{gap:6px;min-width:0;}
+  .table-price{font-size:12px;}
+  .table-original{font-size:10px;margin-left:0;display:block;}
+  .table-btn{padding:5px 8px;font-size:10px;}
+}
+
 .loading{text-align:center;padding:60px 0 40px;display:none;}
 .spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite,glowPulse 2s ease-in-out infinite;margin:0 auto 20px;}
 @keyframes spin{to{transform:rotate(360deg)}}
