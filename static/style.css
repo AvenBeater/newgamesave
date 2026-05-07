@@ -227,6 +227,20 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .table-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:6px 14px;border-radius:6px;font-size:11px;font-family:'Syne',sans-serif;font-weight:700;transition:all .15s;white-space:nowrap;}
 .table-btn:hover{background:var(--accent);color:#000;border-color:transparent;}
 
+/* Hero overlay y grid en pantallas medias-pequeñas: stack column en hero, 1 col en grid. */
+@media(max-width:640px){
+  .game-card-hero{height:auto;min-height:220px;}
+  .game-card-hero-overlay{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:12px;padding:18px 20px;}
+  .price-main{font-size:1.9rem;}
+  .store-name{font-size:1.2rem;}
+  .best-deal-btn{margin-left:0;align-self:flex-start;padding:9px 18px;font-size:12px;}
+  .best-deal-tag{font-size:9px;letter-spacing:2px;top:12px;right:14px;}
+  /* Grid view: forzar 1 columna para que las cards tengan ancho completo y el btn-buy no se recorte por contenido apretado. */
+  .price-grid:not(.view-list):not(.view-table){grid-template-columns:1fr;}
+  .price-grid:not(.view-list):not(.view-table) .price-card{padding:16px;}
+  .price-card .card-price{font-size:1.3rem;}
+}
+
 /* Search list / table mobile: ajustar precios y cells para que quepan en pantallas pequeñas. */
 @media(max-width:540px){
   /* List view: 2-row layout — store ocupa fila completa, price-info + boton fila inferior. */
