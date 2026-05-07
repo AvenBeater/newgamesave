@@ -42,3 +42,6 @@ logs/
 
 # ── Claude Code (sesión local) ──
 .claude/
+
+# ── Capturas de referencia para iteracion con Claude (no commitear) ──
+.refs/
