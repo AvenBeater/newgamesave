@@ -227,29 +227,33 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .table-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);text-decoration:none;padding:6px 14px;border-radius:6px;font-size:11px;font-family:'Syne',sans-serif;font-weight:700;transition:all .15s;white-space:nowrap;}
 .table-btn:hover{background:var(--accent);color:#000;border-color:transparent;}
 
-/* Hero stacked + grid 1col en pantallas medias-pequeñas. */
+/* Hero box fijo + grid 1col en pantallas medias-pequeñas. */
 @media(max-width:640px){
-  /* Hero: pasa de overlay-on-image a stack vertical — imagen arriba en su ratio
-     natural (visible al 100%, sin gradient oscureciendola) + overlay como banner
-     abajo con bg propio. Mantiene tag de "MEJOR PRECIO" absoluta sobre la imagen. */
+  /* Hero: box 220px fijo. La imagen ocupa el espacio entero con `object-fit:contain`
+     (visible al 100% sin recorte; bg surface2 rellena los lados sobrantes cuando
+     el aspect del cover no coincide con el del box). El overlay vuelve a ser
+     absolute on top con gradient oscuro que se concentra en la parte inferior
+     para asegurar la legibilidad del texto sin tapar el centro de la imagen. */
   .game-card-hero{
-    height:auto;min-height:0;
-    display:flex;flex-direction:column;
+    height:220px;min-height:0;
+    position:relative;
     background:var(--surface2);
   }
   .game-card-hero-img{
-    position:static;width:100%;height:auto;display:block;
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    display:block;
     object-fit:contain;filter:none;
   }
   .game-card-hero-overlay{
-    position:static;inset:auto;
-    flex-direction:column;align-items:flex-start;justify-content:flex-start;
+    position:absolute;inset:0;
+    flex-direction:column;align-items:flex-start;justify-content:flex-end;
     gap:10px;padding:16px 20px;
-    background:linear-gradient(135deg, rgba(0,255,135,.05) 0%, transparent 100%);
+    background:linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.45) 35%, transparent 65%);
   }
-  .price-main{font-size:1.9rem;}
-  .store-name{font-size:1.2rem;}
-  .best-deal-btn{margin-left:0;align-self:flex-start;padding:9px 18px;font-size:12px;}
+  .price-main{font-size:1.7rem;}
+  .store-name{font-size:1.1rem;}
+  .best-deal-btn{margin-left:0;align-self:flex-start;padding:8px 16px;font-size:12px;}
   .best-deal-tag{font-size:9px;letter-spacing:2px;top:10px;right:14px;}
   /* Grid view: forzar 1 columna para que las cards tengan ancho completo y el btn-buy no se recorte por contenido apretado. */
   .price-grid:not(.view-list):not(.view-table){grid-template-columns:1fr;}
