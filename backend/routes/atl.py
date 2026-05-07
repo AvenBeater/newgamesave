@@ -1,5 +1,6 @@
 # routes/atl.py — All-Time Low banner (juegos en precio historico minimo hoy)
 
+import math
 import time
 import concurrent.futures
 import requests
@@ -44,6 +45,31 @@ def _is_atl(deal):
     hl = deal.get("historyLow") or {}
     hl_amt = hl.get("amount", 0)
     return hl_amt > 0 and abs(hl_amt - price) <= max(0.01, hl_amt * 0.01)
+
+
+def _wilson_score(score_pct, count, z=1.96):
+    """
+    Limite inferior del intervalo de confianza Wilson para una proporcion
+    binomial. Combina calidad (% positivas) y volumen (cantidad de reviews)
+    en un solo numero entre 0 y 1: alta calidad + alto volumen → cerca de 1;
+    pocas reviews O bajo % → penalizado.
+
+    Es el metodo usado por Reddit, Yelp, IMDB para rankings "best of all time"
+    donde no querés que un juego con 5 reviews al 100% le gane a otro con
+    1000 al 85%.
+
+    score_pct = % positivas (0..100), count = total de reviews. z=1.96 → 95%
+    de confianza.
+    """
+    if count <= 0 or score_pct <= 0:
+        return 0.0
+    p = score_pct / 100.0
+    n = count
+    z2 = z * z
+    denom = 1 + z2 / n
+    center = p + z2 / (2 * n)
+    margin = z * math.sqrt((p * (1 - p) / n) + (z2 / (4 * n * n)))
+    return (center - margin) / denom
 
 
 def _build_game(entry, currency, usd_rate, rates):
@@ -186,17 +212,19 @@ def api_atl_today():
         if len(games) >= 20:
             break
 
-    # Lookup paralelo: Steam appid (cover upgrade) + reviewCount (relevancia)
+    # Lookup paralelo: Steam appid (cover upgrade) + reviews (relevancia)
     _enrich_with_info(pairs)
 
-    # Orden por relevancia: review count de Steam descendente. Juegos sin
-    # reviewCount (no estan en Steam o no tienen reviews aun) caen al final.
-    # Tiebreak secundario: review score, asi entre dos juegos con el mismo
-    # count, gana el de mejor calificación.
-    games.sort(
-        key=lambda g: (g.get("reviewCount", 0), g.get("reviewScore", 0)),
-        reverse=True,
-    )
+    # Orden por Wilson score: balancea calidad (% positivas) y volumen (count
+    # de reviews) en un solo ranking. Un juego con 1000 reviews al 80% ranquea
+    # mas alto que otro con 5 al 100% — la confianza estadistica del primero
+    # es mayor.
+    for g in games:
+        g["_relevance"] = _wilson_score(
+            g.get("reviewScore", 0) or 0,
+            g.get("reviewCount", 0) or 0,
+        )
+    games.sort(key=lambda g: g["_relevance"], reverse=True)
 
     # Dentro del top relevante, los que SI estan al historical low van primero.
     # Asi el slider muestra juegos populares + en ATL real, con los que solo
@@ -204,6 +232,10 @@ def api_atl_today():
     atl_games = [g for g in games if g["isAtl"]]
     other_games = [g for g in games if not g["isAtl"]]
     games = atl_games + other_games
+
+    # Limpieza: el campo _relevance era interno para sortear, no exponerlo
+    for g in games:
+        g.pop("_relevance", None)
 
     _atl_cache[currency] = (now, games)
     return jsonify({"games": games[:limit]})
