@@ -243,7 +243,7 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
     position:absolute;inset:0;
     width:100%;height:100%;
     display:block;
-    object-fit:contain;filter:none;
+    object-fit:cover;filter:none;
   }
   .game-card-hero-overlay{
     position:absolute;inset:0;
