@@ -277,7 +277,21 @@
   // Hook publico
   window.reloadAtlBanner = loadAtlBanner;
 
+  // Sincroniza el texto del loading state con el idioma actual. El servidor
+  // pre-renderiza el INSERT COIN segun CF-IPCountry, pero si el usuario
+  // tiene otra preferencia guardada en localStorage, helpers.js seteo
+  // currentLang distinto y aca lo reflejamos en el texto del loading.
+  function syncLoadingText(){
+    var el = document.querySelector(".atl-loading-text-main");
+    if (!el || typeof t !== "function") return;
+    var localized = t("atlInsertCoin");
+    if (localized && localized !== "atlInsertCoin" && el.textContent !== localized) {
+      el.textContent = localized;
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function(){
+    syncLoadingText();
     setTimeout(loadAtlBanner, 250);
   });
 })();
