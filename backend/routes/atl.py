@@ -91,28 +91,43 @@ def _build_game(entry, currency, usd_rate, rates):
 
 
 def _fetch_game_info(itad_id):
-    """Lookup de un juego en ITAD para sacar Steam appid. Retorna {} si falla."""
+    """
+    Lookup en ITAD para sacar Steam appid + Steam review count/score (señal de
+    relevancia / popularidad). Retorna {} si falla.
+    """
     try:
         r = requests.get(
             "https://api.isthereanydeal.com/games/info/v2",
             params={"key": ITAD_API_KEY, "id": itad_id},
             timeout=8,
         )
-        if r.status_code == 200:
-            data = r.json() or {}
-            appid = data.get("appid")
-            return {"appid": str(appid)} if appid else {}
+        if r.status_code != 200:
+            return {}
+        data = r.json() or {}
+        out = {}
+        appid = data.get("appid")
+        if appid:
+            out["appid"] = str(appid)
+        # Buscar review de Steam para usar como relevancia
+        for review in data.get("reviews", []) or []:
+            if review.get("source") == "Steam":
+                out["reviewCount"] = review.get("count", 0) or 0
+                out["reviewScore"] = review.get("score", 0) or 0
+                break
+        return out
     except Exception:
-        pass
-    return {}
+        return {}
 
 
-def _enrich_with_appids(pairs):
+def _enrich_with_info(pairs):
     """
-    Lookup paralelo de Steam appid para upgrade de cover a library_hero.jpg
-    (1920x620, mucho mejor calidad que el banner600 de ITAD para banner full-width).
+    Lookup paralelo de info de cada juego en ITAD:
+    - Steam appid → cover upgrade a library_hero.jpg (1920x620, mas nitido que
+      el banner600 de ITAD a ancho full-container).
+    - Steam reviewCount / reviewScore → señal de relevancia (mas reviews = mas
+      popular). Usado para ordenar el slider de mas a menos relevante.
     pairs = [(game_dict, itad_id), ...]
-    Muta los game_dict in-place agregando appid + cover Steam.
+    Muta los game_dict in-place.
     """
     if not pairs:
         return
@@ -130,6 +145,8 @@ def _enrich_with_appids(pairs):
                     )
                     # coverFallback ya viene del banner ITAD; si library_hero 404ea
                     # el frontend revierte al banner ITAD via onerror.
+                g["reviewCount"] = info.get("reviewCount", 0)
+                g["reviewScore"] = info.get("reviewScore", 0)
             except Exception:
                 pass
 
@@ -169,13 +186,24 @@ def api_atl_today():
         if len(games) >= 20:
             break
 
-    # Lookup paralelo de Steam appid → upgrade cover a library_hero
-    _enrich_with_appids(pairs)
+    # Lookup paralelo: Steam appid (cover upgrade) + reviewCount (relevancia)
+    _enrich_with_info(pairs)
 
-    # Preferir ATL al frente
+    # Orden por relevancia: review count de Steam descendente. Juegos sin
+    # reviewCount (no estan en Steam o no tienen reviews aun) caen al final.
+    # Tiebreak secundario: review score, asi entre dos juegos con el mismo
+    # count, gana el de mejor calificación.
+    games.sort(
+        key=lambda g: (g.get("reviewCount", 0), g.get("reviewScore", 0)),
+        reverse=True,
+    )
+
+    # Dentro del top relevante, los que SI estan al historical low van primero.
+    # Asi el slider muestra juegos populares + en ATL real, con los que solo
+    # son top-discount (no-ATL) como reserva.
     atl_games = [g for g in games if g["isAtl"]]
-    if len(atl_games) >= 5:
-        games = atl_games + [g for g in games if not g["isAtl"]]
+    other_games = [g for g in games if not g["isAtl"]]
+    games = atl_games + other_games
 
     _atl_cache[currency] = (now, games)
     return jsonify({"games": games[:limit]})
