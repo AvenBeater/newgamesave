@@ -585,3 +585,28 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .toast-error .pa-icon{background-color:var(--accent2);}
 .toast-success .pa-icon{background-color:var(--accent);}
 .toast-info .pa-icon{background-color:var(--muted);}
+
+/* ── ALL-TIME LOW BANNER ─────────────────────────────────────────── */
+.atl-banner{margin-bottom:24px;animation:fadeUp .35s ease both;}
+.atl-banner-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:3px;color:var(--accent);font-weight:700;text-transform:uppercase;}
+.atl-banner-header .pa-icon{font-size:14px;color:var(--accent);}
+.atl-banner-label{display:inline-block;}
+.atl-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.atl-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;overflow:hidden;text-align:left;}
+.atl-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.4),0 0 12px rgba(0,255,135,.1);}
+.atl-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent);}
+.atl-cover{width:100%;aspect-ratio:460/215;object-fit:cover;background:var(--surface2);display:block;}
+.atl-cover-placeholder{background:linear-gradient(135deg,var(--surface2) 0%,var(--surface) 100%);}
+.atl-info{padding:8px 10px 10px;display:flex;flex-direction:column;gap:5px;flex:1;min-width:0;}
+.atl-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.atl-price-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.atl-price{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;}
+.atl-discount{background:var(--accent2);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:100px;letter-spacing:.5px;}
+.atl-meta{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:auto;}
+
+/* Banner mobile: scroll horizontal con snap para feel de "highlights" */
+@media(max-width:640px){
+  .atl-cards{display:flex;grid-template-columns:none;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:6px;gap:8px;}
+  .atl-card{flex:0 0 calc(70% - 4px);scroll-snap-align:start;}
+  .atl-banner-header{font-size:10px;letter-spacing:2px;}
+}

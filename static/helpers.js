@@ -215,6 +215,7 @@ function onCurrencyChange(){
     if (_wlInput && !_wlInput.value) _wlInput.value = _wlSteamId;
     if (typeof loadWishlist === 'function') loadWishlist();
   }
+  if (typeof reloadAtlBanner === 'function') reloadAtlBanner();
 }
 
 // ── UI state helpers ────────────────────────────────────────────
