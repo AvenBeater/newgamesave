@@ -4,7 +4,7 @@ body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;m
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,135,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,135,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
 .container{max-width:1100px;margin:0 auto;padding:0 24px 40px;position:relative;z-index:1;}
 header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
-.site-logo{display:block;width:min(500px,90vw);height:auto;margin:var(--logo-h) auto;transition:filter .3s ease;}
+.site-logo{display:block;width:min(300px,90vw);height:auto;margin:var(--logo-h) auto;transition:filter .3s ease;}
 .site-logo:hover{filter:drop-shadow(0 0 40px rgba(0,255,135,.3));}
 /* Animación de neón parpadeante — preservada para iteración futura.
    Para activarla, añadir `animation:neon-flicker 4s linear infinite;` a .site-logo. */
@@ -588,6 +588,44 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 
 /* ── ALL-TIME LOW SLIDER ─────────────────────────────────────────── */
 .atl-banner{margin-bottom:24px;animation:fadeUp .35s ease both;}
+
+/* Loading state: caja del mismo aspecto que el slider, vibe arcade/CRT.
+   Scanline horizontal sweep + gamepad bouncing + texto "INSERT COIN" +
+   barra de progreso indeterminada con sweep verde. Se reemplaza con el
+   slider cuando atl-banner.js renderiza la data. */
+.atl-loading{position:relative;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at center, rgba(0,255,135,.04) 0%, var(--surface2) 65%);border:1px solid var(--border);aspect-ratio:1920/620;display:flex;align-items:center;justify-content:center;}
+.atl-loading::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(0,255,135,.02) 0px,rgba(0,255,135,.02) 1px,transparent 1px,transparent 3px);pointer-events:none;}
+.atl-loading-scanline{position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(0,255,135,.08) 45%,rgba(0,255,135,.18) 50%,rgba(0,255,135,.08) 55%,transparent 100%);animation:atl-sweep 2.6s linear infinite;pointer-events:none;}
+@keyframes atl-sweep{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+.atl-loading-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px;}
+.atl-loading-icon-wrap{display:flex;align-items:center;justify-content:center;width:56px;height:56px;}
+.atl-loading-icon{width:48px!important;height:48px!important;background-color:var(--accent)!important;animation:atl-bounce 1.1s cubic-bezier(.5,0,.5,1) infinite;filter:drop-shadow(0 0 8px rgba(0,255,135,.4));}
+@keyframes atl-bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.atl-loading-text{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--accent);letter-spacing:6px;text-transform:uppercase;text-shadow:0 0 12px rgba(0,255,135,.5);display:flex;align-items:center;gap:4px;}
+.atl-loading-text-main{animation:atl-blink 1.6s ease-in-out infinite;}
+@keyframes atl-blink{0%,90%,100%{opacity:1;}45%,55%{opacity:.35;}}
+.atl-loading-cursor{display:inline-block;width:10px;height:1.1em;background:var(--accent);margin-left:4px;animation:atl-cursor 0.7s steps(2) infinite;box-shadow:0 0 8px rgba(0,255,135,.5);}
+@keyframes atl-cursor{50%{opacity:0;}}
+.atl-loading-bar{width:240px;height:5px;background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.2);border-radius:3px;overflow:hidden;position:relative;}
+.atl-loading-bar-fill{position:absolute;inset:0;width:35%;background:linear-gradient(90deg,transparent 0%,var(--accent) 50%,transparent 100%);animation:atl-progress 1.4s ease-in-out infinite;box-shadow:0 0 10px rgba(0,255,135,.6);}
+@keyframes atl-progress{0%{transform:translateX(-150%);}100%{transform:translateX(380%);}}
+.atl-loading-sub{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
+
+/* Mobile: aspect mas alto pero compacto en contenido */
+@media(max-width:640px){
+  .atl-loading{aspect-ratio:16/10;}
+  .atl-loading-content{gap:10px;padding:16px;}
+  .atl-loading-icon{width:36px!important;height:36px!important;}
+  .atl-loading-icon-wrap{width:42px;height:42px;}
+  .atl-loading-text{font-size:1rem;letter-spacing:4px;}
+  .atl-loading-bar{width:180px;height:4px;}
+  .atl-loading-sub{font-size:9px;letter-spacing:2px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .atl-loading-scanline,.atl-loading-icon,.atl-loading-text-main,.atl-loading-cursor,.atl-loading-bar-fill{animation:none;}
+}
+
 .atl-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:3px;color:var(--accent);font-weight:700;text-transform:uppercase;}
 .atl-header .pa-icon{font-size:14px;color:var(--accent);}
 .atl-header-label{display:inline-block;}

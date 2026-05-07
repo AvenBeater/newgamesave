@@ -23,8 +23,31 @@
     <div class="rate-badge"><span class="dot"></span><span id="rate-text">Loading...</span></div>
   </header>
 
-  <!-- All-Time Low banner: juegos en precio historico minimo hoy -->
-  <section id="atl-banner" class="atl-banner" style="display:none" aria-label="All-Time Low deals"></section>
+  <!-- All-Time Low banner: juegos en precio historico minimo hoy.
+       Pre-renderizado con loading state retro/arcade hasta que llegue
+       la respuesta de /api/atl-today. -->
+  <section id="atl-banner" class="atl-banner" aria-label="All-Time Low deals">
+    <div class="atl-header">
+      <span class="pa-icon pa-icon-fire"></span>
+      <span class="atl-header-label" id="atl-loading-label">LOADING DEALS</span>
+    </div>
+    <div class="atl-loading" role="status" aria-live="polite" aria-label="Loading all-time low deals">
+      <div class="atl-loading-scanline" aria-hidden="true"></div>
+      <div class="atl-loading-content">
+        <div class="atl-loading-icon-wrap">
+          <span class="pa-icon pa-icon-gamepad atl-loading-icon" aria-hidden="true"></span>
+        </div>
+        <div class="atl-loading-text">
+          <span class="atl-loading-text-main">INSERT COIN</span>
+          <span class="atl-loading-cursor" aria-hidden="true"></span>
+        </div>
+        <div class="atl-loading-bar" aria-hidden="true">
+          <div class="atl-loading-bar-fill"></div>
+        </div>
+        <div class="atl-loading-sub">SCANNING DEALS...</div>
+      </div>
+    </div>
+  </section>
 
   <div class="controls-bar">
     <select class="ctrl-select" id="sel-lang" onchange="onLangChange()">
