@@ -85,34 +85,24 @@
     return html;
   }
 
-  // Sincroniza el #release-hero-bg con la slide actual. Para no duplicar
-  // visualmente el cover del slider (que usa library_hero.jpg), aca
-  // intentamos primero `page_bg_generated_v6b.jpg` (la "page background"
-  // generada de Steam — wide y mas atmosferica). Si Steam no la tiene
-  // para ese appid, fallback a library_hero (que ya validamos antes y
-  // sabemos que existe).
+  // Sincroniza el #release-hero-bg con la slide actual. Usamos el screenshot
+  // de gameplay (`g.screenshot`, viene de Steam appdetails) en lugar del
+  // library_hero que usa el slide. Asi el bleeding muestra una vista
+  // distinta del juego — gameplay real, no el library art curado. Si por
+  // alguna razon el backend no devolvio screenshot, fallback al cover.
   function syncReleaseHero(){
     var bg = document.getElementById("release-hero-bg");
     if (!bg || !_atlGames.length) return;
     var g = _atlGames[_atlIdx];
     if (!g) return;
-    var heroFallback = g.cover || g.coverFallback;
-    if (!heroFallback) return;
-    var pageBg = "https://cdn.akamai.steamstatic.com/steam/apps/"
-                 + g.appid + "/page_bg_generated_v6b.jpg";
-
-    function applyUrl(url){
+    var url = g.screenshot || g.cover || g.coverFallback;
+    if (!url) return;
+    var img = new Image();
+    img.onload = function(){
       bg.style.backgroundImage = "url('" + url + "')";
       if (!bg.classList.contains("loaded")) bg.classList.add("loaded");
-    }
-    var probe = new Image();
-    probe.onload  = function(){ applyUrl(pageBg); };
-    probe.onerror = function(){
-      var fb = new Image();
-      fb.onload = function(){ applyUrl(heroFallback); };
-      fb.src = heroFallback;
     };
-    probe.src = pageBg;
+    img.src = url;
   }
 
   function renderAtlBanner(games){
