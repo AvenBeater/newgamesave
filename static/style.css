@@ -16,7 +16,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
-  filter:blur(40px);
+  filter:blur(18px);
   opacity:0;
   transition:opacity .8s ease-out;
   z-index:0;
@@ -24,9 +24,36 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 25%,transparent 100%);
           mask-image:linear-gradient(to bottom,#000 0%,#000 25%,transparent 100%);
 }
-#release-hero-bg.loaded{opacity:.55;}
+#release-hero-bg.loaded{opacity:.6;}
 @media(max-width:640px){
-  #release-hero-bg{height:480px;filter:blur(28px);}
+  #release-hero-bg{height:480px;filter:blur(12px);}
+}
+/* Label flotante con el titulo del juego — pointer-events:none para no
+   interferir con clicks. z-index:2 lo levanta por encima del .container
+   (z-index:1) asi se ve aunque caiga sobre contenido del header. */
+#release-hero-label{
+  position:absolute;
+  top:18px;right:24px;
+  z-index:2;
+  pointer-events:none;
+  font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);
+  background:rgba(13,17,23,.7);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px 10px;
+  max-width:min(60vw,360px);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  opacity:0;
+  transition:opacity .8s ease-out .15s;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+#release-hero-label.loaded{opacity:1;}
+#release-hero-label .rh-tag{color:var(--accent);margin-right:8px;}
+@media(max-width:640px){
+  #release-hero-label{top:10px;right:12px;font-size:9px;padding:5px 8px;}
 }
 /* ── END EXPERIMENTAL ─────────────────────────────────────────────── */
 header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}

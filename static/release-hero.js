@@ -11,8 +11,14 @@
       ? currentCurrency : "COP";
   }
 
+  function escHtml(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+                    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
   async function loadReleaseHero(){
-    var bg = document.getElementById("release-hero-bg");
+    var bg    = document.getElementById("release-hero-bg");
+    var label = document.getElementById("release-hero-label");
     if (!bg) return;
     try {
       var r = await fetch("/api/new-release-hero?currency=" + getCurrency());
@@ -25,6 +31,10 @@
         img.onload = function(){
           bg.style.backgroundImage = "url('" + data.game.hero + "')";
           bg.classList.add("loaded");
+          if (label) {
+            label.innerHTML = "<span class='rh-tag'>NEW</span>" + escHtml(data.game.title);
+            label.classList.add("loaded");
+          }
         };
         img.src = data.game.hero;
       }
