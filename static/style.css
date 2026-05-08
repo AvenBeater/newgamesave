@@ -19,15 +19,13 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   left:0;right:0;
   top:0;
   height:710px;
-  background-size:cover;
-  background-position:center top;
-  background-repeat:no-repeat;
   filter:blur(3px);
   opacity:0;
   transition:opacity .8s ease-out;
   z-index:0;
   pointer-events:none;
   border-top:1px solid #21262d;
+  overflow:hidden;
   -webkit-mask-image:
     linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%),
     linear-gradient(to right,transparent 0%,#000 10%,#000 90%,transparent 100%);
@@ -44,6 +42,26 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   #release-hero-bg{height:125px;filter:blur(1px);}
 }
 #release-hero-bg.loaded{opacity:.55;}
+/* Cross-fade + Ken Burns: dos slots stacked. Cuando entra una nueva
+   imagen, su slot pasa a `.active` (opacity 1, scale 1) mientras el
+   otro pierde el `.active` (opacity 0, vuelve a scale 1.04). Asi se
+   mezclan por .7s y la entrante "se asienta" desde un zoom sutil. */
+.rh-layer{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center top;
+  background-repeat:no-repeat;
+  opacity:0;
+  transform:scale(1.04);
+  transform-origin:center center;
+  transition:opacity .7s ease,transform 1.6s ease-out;
+  will-change:opacity,transform;
+}
+.rh-layer.active{
+  opacity:1;
+  transform:scale(1);
+}
 /* ── END EXPERIMENTAL ─────────────────────────────────────────────── */
 header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .site-logo{display:block;width:min(300px,90vw);height:auto;margin:var(--logo-h) auto;transition:filter .3s ease;}
@@ -705,7 +723,15 @@ footer .controls-bar{justify-content:center;margin-bottom:14px;}
 .atl-slide-cta:hover{background:#00e878;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,255,135,.3);}
 
 /* Flechas de navegacion */
-.atl-nav{position:absolute;top:50%;transform:translateY(-50%);width:35px;height:35px;padding:0;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;font-family:'Syne',sans-serif;font-weight:800;z-index:3;transition:background .2s,border-color .2s,color .2s,transform .2s;}
+.atl-nav{position:absolute;top:50%;transform:translateY(-50%);width:35px;height:35px;padding:0;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;font-family:'Syne',sans-serif;font-weight:800;z-index:3;transition:background .2s,border-color .2s,color .2s,transform .2s,opacity .25s,visibility .25s;}
+/* Hover-to-reveal solo en devices con hover real (desktop). En touch
+   queda siempre visible (excepto en mobile <=640 que ya tiene display:none).
+   focus-within mantiene accesibilidad para nav por teclado. */
+@media(hover:hover){
+  .atl-nav{opacity:0;visibility:hidden;}
+  .atl-slider:hover .atl-nav,
+  .atl-slider:focus-within .atl-nav{opacity:1;visibility:visible;}
+}
 .atl-nav:hover{background:var(--accent);color:#000;border-color:var(--accent);transform:translateY(-50%) scale(1.05);}
 .atl-nav:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .atl-nav-prev{left:8px;}
