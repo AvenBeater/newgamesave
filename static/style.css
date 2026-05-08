@@ -9,15 +9,16 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
    + banner ATL, blurreado y con fade-out al bg del sitio (mask-image).
    Si la prueba no pega: borrar este bloque entero + el div #release-hero-bg
    en index.html + static/release-hero.js + el blueprint new_release.py.   */
-/* `top` y `height` los setea JS: top = offsetTop del #ui-subtitle (logo
-   queda arriba), height = distancia hasta `.tabs` (el bleeding pasa el
-   slider y el fade termina justo en las tabs). Border-top como separador
-   sutil al estilo del resto del sitio. */
+/* `top` lo setea JS al offsetTop del #ui-subtitle (logo queda arriba).
+   Height fija. En desktop el hero no abarca el 100% del viewport: deja
+   150px a cada lado para que respire. En mobile vuelve a full bleed.
+   Mask-composite intersect combina dos gradientes (vertical + horizontal)
+   asi el fade sale en los costados ademas de abajo. */
 #release-hero-bg{
   position:absolute;
   left:0;right:0;
   top:0;
-  height:640px;
+  height:710px;
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
@@ -27,8 +28,17 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   z-index:0;
   pointer-events:none;
   border-top:1px solid #21262d;
-  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%);
-          mask-image:linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%),
+    linear-gradient(to right,transparent 0%,#000 10%,#000 90%,transparent 100%);
+  -webkit-mask-composite:source-in;
+          mask-image:
+    linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%),
+    linear-gradient(to right,transparent 0%,#000 10%,#000 90%,transparent 100%);
+          mask-composite:intersect;
+}
+@media(min-width:768px){
+  #release-hero-bg{left:150px;right:150px;}
 }
 #release-hero-bg.loaded{opacity:.55;}
 /* ── END EXPERIMENTAL ─────────────────────────────────────────────── */

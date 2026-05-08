@@ -1,41 +1,30 @@
 // release-hero.js — Posicionamiento del #release-hero-bg.
 //
 // La imagen la setea atl-banner.js (`syncReleaseHero`) cada vez que cambia
-// la slide. Aca solo nos encargamos del layout: top = #ui-subtitle,
-// height = distancia hasta `.tabs`, recalculado on resize y cuando el
-// slider cambia de tamano (loading vs renderizado).
+// la slide. Aca solo nos encargamos del top: alineado al #ui-subtitle. La
+// height vive en CSS (fija). Recalcula on resize porque el header cambia
+// altura con el clamp() del logo + viewport width.
 //
 // **Experimental**: si la prueba no pega, borrar este archivo + el div
 // + el bloque CSS marcado en style.css + la funcion syncReleaseHero en
 // atl-banner.js + el sync en renderAtlBanner/animateTo.
 
 (function(){
-  // Cuanto pixeles extra de altura mas alla del top de las tabs — el
-  // bleeding "se cae" un poco mas abajo asi para que el fade no se sienta
-  // cortado en el borde de las tabs.
-  var BLEED_BELOW_TABS = 250;
-
   function positionHeroBg(){
-    var bg   = document.getElementById("release-hero-bg");
-    var sub  = document.getElementById("ui-subtitle");
-    var tabs = document.querySelector(".tabs");
+    var bg  = document.getElementById("release-hero-bg");
+    var sub = document.getElementById("ui-subtitle");
     if (!bg || !sub) return;
-    var subRect = sub.getBoundingClientRect();
+    var rect = sub.getBoundingClientRect();
     // Math.round → top entero, evita renders sub-pixel raros y queda
     // alineado a las lineas del grid pseudo de body::before.
-    var topY = Math.round(subRect.top + window.pageYOffset);
+    var topY = Math.round(rect.top + window.pageYOffset);
     bg.style.top = Math.max(0, topY) + "px";
-    if (tabs) {
-      var tabsRect = tabs.getBoundingClientRect();
-      var bottomY = Math.round(tabsRect.top + window.pageYOffset);
-      bg.style.height = Math.max(200, bottomY - topY + BLEED_BELOW_TABS) + "px";
-    }
   }
 
   document.addEventListener("DOMContentLoaded", positionHeroBg);
 
-  // Resize cambia el offsetTop del subtitle (clamp del logo + viewport)
-  // y la posicion de las tabs. Throttle simple con rAF.
+  // Resize cambia el offsetTop del subtitle (clamp del logo + viewport).
+  // Throttle simple con rAF para no recalcular en cada pixel del resize.
   var _resizeRaf = null;
   window.addEventListener("resize", function(){
     if (_resizeRaf) return;
@@ -44,16 +33,4 @@
       positionHeroBg();
     });
   });
-
-  // El slider ATL pasa de loading (compacto) a render (alto): empuja
-  // `.tabs` hacia abajo y la altura calculada queda corta. ResizeObserver
-  // re-mide cuando el banner cambia de tamano.
-  if (typeof ResizeObserver !== "undefined") {
-    document.addEventListener("DOMContentLoaded", function(){
-      var atl = document.getElementById("atl-banner");
-      if (!atl) return;
-      var ro = new ResizeObserver(function(){ positionHeroBg(); });
-      ro.observe(atl);
-    });
-  }
 })();
