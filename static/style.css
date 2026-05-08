@@ -679,7 +679,7 @@ footer .controls-bar{justify-content:center;margin-bottom:14px;}
 .atl-header .pa-icon{font-size:22px;color:var(--accent);}
 .atl-header-label{display:inline-block;}
 
-.atl-slider{position:relative;border-radius:14px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);box-shadow:0 0 24px rgba(0,255,135,.08);}
+.atl-slider{position:relative;border-radius:14px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);box-shadow:0 0 32px rgba(0,255,135,.22),0 0 72px rgba(0,255,135,.1);}
 .atl-track{display:flex;transition:transform .45s cubic-bezier(.22,.61,.36,1);will-change:transform;}
 .atl-slide{flex:0 0 100%;position:relative;aspect-ratio:1920/620;background:var(--surface2);cursor:pointer;overflow:hidden;}
 .atl-slide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
