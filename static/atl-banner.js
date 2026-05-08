@@ -324,6 +324,21 @@
   // Hook publico
   window.reloadAtlBanner = loadAtlBanner;
 
+  // Re-render desde la data ya cacheada en `_atlGames`, sin refetch a la API.
+  // Lo usamos en onLangChange: los strings i18n del banner (header, tag,
+  // CTA, bundles label) viven en `t(...)` y se evaluan al construir el HTML,
+  // asi que un re-render simple con los mismos juegos ya basta para
+  // traducir todo. Refetch innecesario porque los datos del backend no
+  // dependen del idioma de la UI.
+  window.rerenderAtlBanner = function(){
+    if (_atlGames && _atlGames.length) {
+      stopAuto();
+      renderAtlBanner(_atlGames);
+    } else {
+      syncLoadingText();   // banner aun en loading: solo actualizar el INSERT COIN
+    }
+  };
+
   // Sincroniza el texto del loading state con el idioma actual. El servidor
   // pre-renderiza el INSERT COIN segun CF-IPCountry, pero si el usuario
   // tiene otra preferencia guardada en localStorage, helpers.js seteo

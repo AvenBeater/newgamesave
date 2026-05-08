@@ -205,6 +205,9 @@ function onLangChange(){
       updateProgress(typeof _wlLoaded !== 'undefined' ? _wlLoaded : 0);
     }
   }
+  // ATL banner: re-render con la data ya en memoria (no hace falta refetch
+  // — los precios siguen igual, solo cambian los strings i18n).
+  if (typeof rerenderAtlBanner === 'function') rerenderAtlBanner();
 }
 
 function onCurrencyChange(){
