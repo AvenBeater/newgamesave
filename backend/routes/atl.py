@@ -96,9 +96,22 @@ def _enrich_with_best_deal(games, currency):
     def _best_for(game):
         try:
             deals = get_all_itad_prices(game["appid"], game["title"], currency, usd_rate)
-            if not deals:
+            # Excluimos los deals de Steam que vienen via ITAD. Ya tenemos el
+            # precio Steam autoritativo desde featuredcategories (precio
+            # regional real); ITAD a veces reporta un valor distinto (caso
+            # observado: BG3 en COP, featuredcategories $149k vs ITAD-Steam
+            # $128k). Mirroreamos lo que hace `/api/prices`: Steam viene de
+            # Steam direct, las demas tiendas via ITAD.
+            non_steam = []
+            for d in deals:
+                sid = str(d.get("store") or "").lower()
+                sname = str(d.get("storeName") or "").lower()
+                if "steam" in sid or "steam" in sname:
+                    continue
+                non_steam.append(d)
+            if not non_steam:
                 return None
-            return min(deals, key=lambda d: d.get("priceNative", float("inf")))
+            return min(non_steam, key=lambda d: d.get("priceNative", float("inf")))
         except Exception:
             return None
 
