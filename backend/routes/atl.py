@@ -13,7 +13,7 @@ from flask import Blueprint, jsonify, request
 
 from ..config import CURRENCY_CONFIG, STEAM_LANG, STEAM_HEADERS
 from ..currency import get_exchange_rates
-from ..steam_api import has_real_library_hero
+from ..steam_api import has_real_library_hero, get_steam_bundles
 from ..itad_api import get_all_itad_prices
 
 # Map currency → idioma del frontend, para pasarle a Steam el `l` correcto.
@@ -129,6 +129,31 @@ def _enrich_with_best_deal(games, currency):
                 pass
 
 
+def _enrich_with_bundles_count(games, currency):
+    """
+    Cuenta cuantos bundles de Steam contienen cada juego (independiente del
+    deal que se muestre). Se renderiza como contador chico debajo del precio.
+    """
+    if not games:
+        return
+    cc = CURRENCY_CONFIG.get(currency, CURRENCY_CONFIG["COP"])["cc"]
+
+    def _count(game):
+        try:
+            return len(get_steam_bundles(game["appid"], cc) or [])
+        except Exception:
+            return 0
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(games)) as ex:
+        futures = {ex.submit(_count, g): g for g in games}
+        for future in concurrent.futures.as_completed(futures):
+            g = futures[future]
+            try:
+                g["bundlesCount"] = future.result()
+            except Exception:
+                g["bundlesCount"] = 0
+
+
 def _validate_and_upgrade_covers(games):
     """
     HEAD checks paralelos a `library_hero.jpg`. Si existe como imagen real
@@ -205,6 +230,10 @@ def api_atl_today():
     # otra tienda (Nuuvem, GMG, Fanatical, etc.) tiene mejor precio. Asi el
     # banner es consistente con lo que el user ve al hacer click.
     _enrich_with_best_deal(games, currency)
+
+    # Cantidad de bundles en Steam que contienen cada juego (se muestra como
+    # contador debajo del precio, independiente del store del deal).
+    _enrich_with_bundles_count(games, currency)
 
     _atl_cache[currency] = (now, games)
     return jsonify({"games": games[:limit]})

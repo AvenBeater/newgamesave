@@ -62,6 +62,13 @@
       html += "<span class='atl-slide-discount'>-" + g.discount + "%</span>";
     }
     html += "</div>";
+    if (g.bundlesCount > 0) {
+      var bundleLbl = (typeof t === "function" && t("bundlesLabel")) || "bundles";
+      html += "<div class='atl-slide-bundles'>"
+        + "<span class='pa-icon pa-icon-gift'></span> "
+        + g.bundlesCount + " " + esc(bundleLbl)
+        + "</div>";
+    }
     var ctaLabel = (typeof t === "function" && t("atlCta")) || "Ver precios";
     html += "<button class='atl-slide-cta' type='button' onclick='event.stopPropagation();atlSlideClick(" + i + ")'>"
       + esc(ctaLabel) + " &#x2192;</button>";
