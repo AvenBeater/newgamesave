@@ -85,25 +85,34 @@
     return html;
   }
 
-  // Sincroniza el #release-hero-bg con la slide actual: pinta el cover
-  // (library_hero) del juego del idx activo. Al cambiar slide, cambia
-  // la imagen — la idea es que el bleeding bg "vaya con" el slider en
-  // vez de mostrar un juego no relacionado.
+  // Sincroniza el #release-hero-bg con la slide actual. Para no duplicar
+  // visualmente el cover del slider (que usa library_hero.jpg), aca
+  // intentamos primero `page_bg_generated_v6b.jpg` (la "page background"
+  // generada de Steam — wide y mas atmosferica). Si Steam no la tiene
+  // para ese appid, fallback a library_hero (que ya validamos antes y
+  // sabemos que existe).
   function syncReleaseHero(){
     var bg = document.getElementById("release-hero-bg");
     if (!bg || !_atlGames.length) return;
     var g = _atlGames[_atlIdx];
     if (!g) return;
-    var url = g.cover || g.coverFallback;
-    if (!url) return;
-    // Preload — evita el flash cuando una imagen tarda. Browser cachea
-    // la URL despues del primer load asi que el segundo viaje es local.
-    var img = new Image();
-    img.onload = function(){
+    var heroFallback = g.cover || g.coverFallback;
+    if (!heroFallback) return;
+    var pageBg = "https://cdn.akamai.steamstatic.com/steam/apps/"
+                 + g.appid + "/page_bg_generated_v6b.jpg";
+
+    function applyUrl(url){
       bg.style.backgroundImage = "url('" + url + "')";
       if (!bg.classList.contains("loaded")) bg.classList.add("loaded");
+    }
+    var probe = new Image();
+    probe.onload  = function(){ applyUrl(pageBg); };
+    probe.onerror = function(){
+      var fb = new Image();
+      fb.onload = function(){ applyUrl(heroFallback); };
+      fb.src = heroFallback;
     };
-    img.src = url;
+    probe.src = pageBg;
   }
 
   function renderAtlBanner(games){

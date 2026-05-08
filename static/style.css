@@ -38,7 +38,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           mask-composite:intersect;
 }
 @media(min-width:768px){
-  #release-hero-bg{left:150px;right:150px;}
+  #release-hero-bg{left:25px;right:25px;}
 }
 #release-hero-bg.loaded{opacity:.55;}
 /* ── END EXPERIMENTAL ─────────────────────────────────────────────── */
