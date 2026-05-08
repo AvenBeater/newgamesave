@@ -11,16 +11,24 @@
       ? currentCurrency : "COP";
   }
 
-  // Posiciona el bg empezando desde el #ui-subtitle hacia abajo. El logo
-  // queda intocado encima. Recalcula on resize porque la altura del
-  // header cambia con clamp() del logo + viewport width.
-  function positionHeroTop(){
-    var bg  = document.getElementById("release-hero-bg");
-    var sub = document.getElementById("ui-subtitle");
+  // Posiciona el bg empezando desde el #ui-subtitle hacia abajo y le
+  // estira la altura hasta llegar al `.tabs`. Asi el bleeding pasa el
+  // slider y el fade termina justo en las tabs. El logo queda intocado.
+  // Recalcula on resize: el header cambia altura por el clamp() del logo
+  // y el slider puede cambiar layout (loading vs render).
+  function positionHeroBg(){
+    var bg   = document.getElementById("release-hero-bg");
+    var sub  = document.getElementById("ui-subtitle");
+    var tabs = document.querySelector(".tabs");
     if (!bg || !sub) return;
-    var rect = sub.getBoundingClientRect();
-    var docTop = rect.top + window.pageYOffset;
-    bg.style.top = Math.max(0, docTop) + "px";
+    var subRect = sub.getBoundingClientRect();
+    var topY = subRect.top + window.pageYOffset;
+    bg.style.top = Math.max(0, topY) + "px";
+    if (tabs) {
+      var tabsRect = tabs.getBoundingClientRect();
+      var bottomY = tabsRect.top + window.pageYOffset;
+      bg.style.height = Math.max(200, bottomY - topY) + "px";
+    }
   }
 
   async function loadReleaseHero(){
@@ -37,13 +45,13 @@
         var img = new Image();
         img.onload = function(){
           bg.style.backgroundImage = "url('" + data.game.hero + "')";
-          positionHeroTop();   // re-pos por si layout cambio mientras cargaba
+          positionHeroBg();   // re-pos por si layout cambio mientras cargaba
           bg.classList.add("loaded");
           if (title) {
             title.textContent = data.game.title;
             title.classList.add("loaded");
             // El title pushea el slider: re-pos del bg al asentar el layout
-            requestAnimationFrame(positionHeroTop);
+            requestAnimationFrame(positionHeroBg);
           }
         };
         img.src = data.game.hero;
@@ -56,7 +64,7 @@
   window.reloadReleaseHero = loadReleaseHero;
 
   document.addEventListener("DOMContentLoaded", function(){
-    positionHeroTop();
+    positionHeroBg();
     setTimeout(loadReleaseHero, 50);
   });
   // Resize cambia el offsetTop del subtitle (clamp del logo + viewport).
@@ -66,7 +74,19 @@
     if (_resizeRaf) return;
     _resizeRaf = requestAnimationFrame(function(){
       _resizeRaf = null;
-      positionHeroTop();
+      positionHeroBg();
     });
   });
+
+  // El slider ATL pasa de loading (compacto) a render (alto), eso
+  // empuja `.tabs` hacia abajo y la height calculada del hero queda corta.
+  // ResizeObserver re-mide cuando el banner cambia de tamano.
+  if (typeof ResizeObserver !== "undefined") {
+    document.addEventListener("DOMContentLoaded", function(){
+      var atl = document.getElementById("atl-banner");
+      if (!atl) return;
+      var ro = new ResizeObserver(function(){ positionHeroBg(); });
+      ro.observe(atl);
+    });
+  }
 })();
