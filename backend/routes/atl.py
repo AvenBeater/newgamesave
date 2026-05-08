@@ -12,12 +12,7 @@ import requests
 from flask import Blueprint, jsonify, request
 
 from ..config import CURRENCY_CONFIG, STEAM_LANG, STEAM_HEADERS
-
-# Threshold para detectar el placeholder rojo "imagen no disponible" de Steam.
-# Cuando un juego no tiene library_hero.jpg, el CDN de Steam responde HTTP 200
-# con un placeholder generico de ~14KB. Imagenes hero reales pesan 60KB+. El
-# threshold es conservador para no bajar covers reales pero raros.
-_LIBRARY_HERO_MIN_BYTES = 25_000
+from ..steam_api import has_real_library_hero
 
 # Map currency → idioma del frontend, para pasarle a Steam el `l` correcto.
 _CURRENCY_TO_LANG = {
@@ -76,28 +71,6 @@ def _build_game(item, currency):
     }
 
 
-def _has_real_library_hero(appid):
-    """
-    HEAD a `library_hero.jpg`: True si existe Y no es el placeholder rojo
-    generico que Steam sirve para juegos sin hero asset (~14KB). Imagenes
-    reales pesan al menos 25KB.
-    """
-    try:
-        r = requests.head(
-            f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/library_hero.jpg",
-            timeout=4,
-            allow_redirects=False,
-        )
-        if r.status_code != 200:
-            return False
-        try:
-            return int(r.headers.get("Content-Length", 0)) >= _LIBRARY_HERO_MIN_BYTES
-        except (ValueError, TypeError):
-            return False
-    except Exception:
-        return False
-
-
 def _validate_and_upgrade_covers(games):
     """
     HEAD checks paralelos a `library_hero.jpg`. Si existe como imagen real
@@ -108,7 +81,7 @@ def _validate_and_upgrade_covers(games):
     if not games:
         return
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
-        futures = {ex.submit(_has_real_library_hero, g["appid"]): g for g in games}
+        futures = {ex.submit(has_real_library_hero, g["appid"]): g for g in games}
         for future in concurrent.futures.as_completed(futures):
             g = futures[future]
             try:
