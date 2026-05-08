@@ -294,8 +294,11 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .empty{text-align:center;padding:60px 0;color:var(--muted);display:none;}
 .empty .icon{font-size:3rem;margin-bottom:16px;}
 .empty p{font-size:14px;}
-footer{padding:30px 0 24px;color:var(--muted);font-size:11px;letter-spacing:1px;text-align:center;}
-.footer-content{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+/* z-index:1 indispensable — el footer vive fuera de .container (que ya tiene
+   z-index:1), asi que sin esto la grid pseudo de body::before (z-index:0,
+   position:fixed) le pinta encima a los selectores y se vuelven invisibles. */
+footer{padding:30px 0 24px;color:var(--muted);font-size:11px;letter-spacing:1px;text-align:center;position:relative;z-index:1;}
+.footer-content{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;align-items:center;gap:14px;}
 .footer-content .controls-bar{margin-bottom:0;justify-content:center;}
 /* ── TABS ─────────────────────────────────────────────── */
 .tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0;}
