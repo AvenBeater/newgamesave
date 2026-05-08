@@ -208,6 +208,7 @@ def api_atl_today():
 
     games = []
     seen = set()
+    fetch_ok = False
     try:
         r = requests.get(
             "https://store.steampowered.com/api/featuredcategories",
@@ -216,6 +217,7 @@ def api_atl_today():
             timeout=10,
         )
         if r.status_code == 200:
+            fetch_ok = True
             data = r.json() or {}
             # specials primero (deals curados), top_sellers despues como fill.
             # Dedupe por appid: si un juego sale en ambas secciones, queda la
@@ -230,8 +232,20 @@ def api_atl_today():
                     if g:
                         games.append(g)
                         seen.add(appid)
+        else:
+            print(f"[featured] non-200 status: {r.status_code}")
     except Exception as e:
         print(f"[featured] fetch error: {e}")
+
+    # Stale-while-error: si Steam fallo (403, timeout, etc) y tenemos cache
+    # vieja (incluso expirada), preferimos servir la vieja antes que vaciar
+    # el banner. Tambien evitamos cachear listas vacias — si Steam vuelve en
+    # 5min, el proximo request reintenta en vez de servir [] hasta el TTL.
+    if not games:
+        if cached and cached[1]:
+            print(f"[featured] {currency}: serving stale cache ({len(cached[1])} games)")
+            return jsonify({"games": cached[1][:limit]})
+        return jsonify({"games": []})  # no cacheamos vacio
 
     # Upgrade covers a library_hero.jpg cuando exista como imagen real, no
     # como el placeholder rojo de Steam. HEAD requests paralelos (~200-400ms

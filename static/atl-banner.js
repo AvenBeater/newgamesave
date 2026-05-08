@@ -22,16 +22,24 @@
     var el = document.getElementById("atl-banner");
     if (!el) return;
     try {
+      stopAuto();          // matar el auto-rotate viejo antes de re-render
       var r = await fetch("/api/atl-today?currency=" + getCurrency() + "&limit=" + ATL_LIMIT);
-      if (!r.ok) { el.style.display = "none"; return; }
+      if (!r.ok) {
+        // Si ya teniamos un render bueno antes, lo dejamos puesto en vez de
+        // ocultar el banner por un error transient (Steam 403/timeout, etc).
+        if (!_atlGames.length) el.style.display = "none";
+        return;
+      }
       var data = await r.json();
       if (data.games && data.games.length) {
         renderAtlBanner(data.games);
-      } else {
+      } else if (!_atlGames.length) {
+        // No hay data y nunca renderizamos: hide. Si ya habia banner
+        // anterior (currency switch fallido), lo dejamos como estaba.
         el.style.display = "none";
       }
     } catch(e) {
-      el.style.display = "none";
+      if (!_atlGames.length) el.style.display = "none";
     }
   }
 
