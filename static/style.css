@@ -297,9 +297,9 @@ header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 /* z-index:1 indispensable — el footer vive fuera de .container (que ya tiene
    z-index:1), asi que sin esto la grid pseudo de body::before (z-index:0,
    position:fixed) le pinta encima a los selectores y se vuelven invisibles. */
-footer{padding:30px 0 24px;color:var(--muted);font-size:11px;letter-spacing:1px;text-align:center;position:relative;z-index:1;}
-.footer-content{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;align-items:center;gap:14px;}
-.footer-content .controls-bar{margin-bottom:0;justify-content:center;}
+footer{padding:30px 24px 24px;color:var(--muted);font-size:11px;letter-spacing:1px;text-align:center;position:relative;z-index:1;max-width:1100px;margin:0 auto;}
+footer .controls-bar{justify-content:center;margin-bottom:14px;}
+.footer-tag{color:var(--muted);}
 /* ── TABS ─────────────────────────────────────────────── */
 .tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0;}
 .tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;padding:10px 20px;cursor:pointer;transition:all .2s;margin-bottom:-1px;border-radius:8px 8px 0 0;}
