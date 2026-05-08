@@ -10,18 +10,25 @@
 // atl-banner.js + el sync en renderAtlBanner/animateTo.
 
 (function(){
+  // Cuanto pixeles extra de altura mas alla del top de las tabs — el
+  // bleeding "se cae" un poco mas abajo asi para que el fade no se sienta
+  // cortado en el borde de las tabs.
+  var BLEED_BELOW_TABS = 250;
+
   function positionHeroBg(){
     var bg   = document.getElementById("release-hero-bg");
     var sub  = document.getElementById("ui-subtitle");
     var tabs = document.querySelector(".tabs");
     if (!bg || !sub) return;
     var subRect = sub.getBoundingClientRect();
-    var topY = subRect.top + window.pageYOffset;
+    // Math.round → top entero, evita renders sub-pixel raros y queda
+    // alineado a las lineas del grid pseudo de body::before.
+    var topY = Math.round(subRect.top + window.pageYOffset);
     bg.style.top = Math.max(0, topY) + "px";
     if (tabs) {
       var tabsRect = tabs.getBoundingClientRect();
-      var bottomY = tabsRect.top + window.pageYOffset;
-      bg.style.height = Math.max(200, bottomY - topY) + "px";
+      var bottomY = Math.round(tabsRect.top + window.pageYOffset);
+      bg.style.height = Math.max(200, bottomY - topY + BLEED_BELOW_TABS) + "px";
     }
   }
 
