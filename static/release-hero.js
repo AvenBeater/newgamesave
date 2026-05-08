@@ -1,21 +1,15 @@
-// release-hero.js — Pinta el library_hero de un juego destacado
-// (recien salido + relevante) en el #release-hero-bg. Fondo decorativo,
-// no clickeable.
+// release-hero.js — Posicionamiento del #release-hero-bg.
+//
+// La imagen la setea atl-banner.js (`syncReleaseHero`) cada vez que cambia
+// la slide. Aca solo nos encargamos del layout: top = #ui-subtitle,
+// height = distancia hasta `.tabs`, recalculado on resize y cuando el
+// slider cambia de tamano (loading vs renderizado).
 //
 // **Experimental**: si la prueba no pega, borrar este archivo + el div
-// + el bloque CSS marcado en style.css.
+// + el bloque CSS marcado en style.css + la funcion syncReleaseHero en
+// atl-banner.js + el sync en renderAtlBanner/animateTo.
 
 (function(){
-  function getCurrency(){
-    return (typeof currentCurrency !== "undefined" && currentCurrency)
-      ? currentCurrency : "COP";
-  }
-
-  // Posiciona el bg empezando desde el #ui-subtitle hacia abajo y le
-  // estira la altura hasta llegar al `.tabs`. Asi el bleeding pasa el
-  // slider y el fade termina justo en las tabs. El logo queda intocado.
-  // Recalcula on resize: el header cambia altura por el clamp() del logo
-  // y el slider puede cambiar layout (loading vs render).
   function positionHeroBg(){
     var bg   = document.getElementById("release-hero-bg");
     var sub  = document.getElementById("ui-subtitle");
@@ -31,44 +25,10 @@
     }
   }
 
-  async function loadReleaseHero(){
-    var bg    = document.getElementById("release-hero-bg");
-    var title = document.getElementById("release-hero-title");
-    if (!bg) return;
-    try {
-      var r = await fetch("/api/new-release-hero?currency=" + getCurrency());
-      if (!r.ok) return;
-      var data = await r.json();
-      if (data.game && data.game.hero) {
-        // Preload primero, despues set + fade-in. Asi evitamos el "flash"
-        // de un bg negro -> imagen pop.
-        var img = new Image();
-        img.onload = function(){
-          bg.style.backgroundImage = "url('" + data.game.hero + "')";
-          positionHeroBg();   // re-pos por si layout cambio mientras cargaba
-          bg.classList.add("loaded");
-          if (title) {
-            title.textContent = data.game.title;
-            title.classList.add("loaded");
-            // El title pushea el slider: re-pos del bg al asentar el layout
-            requestAnimationFrame(positionHeroBg);
-          }
-        };
-        img.src = data.game.hero;
-      }
-    } catch(e) {}
-  }
+  document.addEventListener("DOMContentLoaded", positionHeroBg);
 
-  // Currency change → re-pegar (otro pais puede tener distinto top seller).
-  // No es critico, pero alinea con el comportamiento del banner ATL.
-  window.reloadReleaseHero = loadReleaseHero;
-
-  document.addEventListener("DOMContentLoaded", function(){
-    positionHeroBg();
-    setTimeout(loadReleaseHero, 50);
-  });
-  // Resize cambia el offsetTop del subtitle (clamp del logo + viewport).
-  // Throttle simple con rAF para no recalcular en cada pixel del resize.
+  // Resize cambia el offsetTop del subtitle (clamp del logo + viewport)
+  // y la posicion de las tabs. Throttle simple con rAF.
   var _resizeRaf = null;
   window.addEventListener("resize", function(){
     if (_resizeRaf) return;
@@ -78,9 +38,9 @@
     });
   });
 
-  // El slider ATL pasa de loading (compacto) a render (alto), eso
-  // empuja `.tabs` hacia abajo y la height calculada del hero queda corta.
-  // ResizeObserver re-mide cuando el banner cambia de tamano.
+  // El slider ATL pasa de loading (compacto) a render (alto): empuja
+  // `.tabs` hacia abajo y la altura calculada queda corta. ResizeObserver
+  // re-mide cuando el banner cambia de tamano.
   if (typeof ResizeObserver !== "undefined") {
     document.addEventListener("DOMContentLoaded", function(){
       var atl = document.getElementById("atl-banner");

@@ -31,35 +31,6 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
           mask-image:linear-gradient(to bottom,#000 0%,#000 70%,transparent 100%);
 }
 #release-hero-bg.loaded{opacity:.55;}
-/* Bleeding title: gap entre header y slider con un titulo legible
-   superpuesto sobre la imagen blureada. */
-.release-hero-title-wrap{
-  position:relative;
-  z-index:1;
-  text-align:center;
-  margin:25px 0 60px;
-}
-.release-hero-title{
-  font-family:'Syne',sans-serif;
-  font-size:30px;
-  font-weight:800;
-  letter-spacing:4px;
-  text-transform:uppercase;
-  color:#fff;
-  margin:0;
-  line-height:1;
-  text-shadow:
-    0 2px 24px rgba(0,0,0,.7),
-    0 0 60px rgba(0,0,0,.5),
-    0 0 90px rgba(0,255,135,.18);
-  opacity:0;
-  transition:opacity 1.1s ease-out;
-  word-break:break-word;
-}
-.release-hero-title.loaded{opacity:1;}
-@media(max-width:640px){
-  .release-hero-title{letter-spacing:2px;}
-}
 /* ── END EXPERIMENTAL ─────────────────────────────────────────────── */
 header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}
 .site-logo{display:block;width:min(300px,90vw);height:auto;margin:var(--logo-h) auto;transition:filter .3s ease;}

@@ -85,6 +85,27 @@
     return html;
   }
 
+  // Sincroniza el #release-hero-bg con la slide actual: pinta el cover
+  // (library_hero) del juego del idx activo. Al cambiar slide, cambia
+  // la imagen — la idea es que el bleeding bg "vaya con" el slider en
+  // vez de mostrar un juego no relacionado.
+  function syncReleaseHero(){
+    var bg = document.getElementById("release-hero-bg");
+    if (!bg || !_atlGames.length) return;
+    var g = _atlGames[_atlIdx];
+    if (!g) return;
+    var url = g.cover || g.coverFallback;
+    if (!url) return;
+    // Preload — evita el flash cuando una imagen tarda. Browser cachea
+    // la URL despues del primer load asi que el segundo viaje es local.
+    var img = new Image();
+    img.onload = function(){
+      bg.style.backgroundImage = "url('" + url + "')";
+      if (!bg.classList.contains("loaded")) bg.classList.add("loaded");
+    };
+    img.src = url;
+  }
+
   function renderAtlBanner(games){
     _atlGames = games;
     _atlIdx = 0;
@@ -132,6 +153,9 @@
 
     el.innerHTML = html;
     el.style.display = "block";
+
+    // Hero bg sync con la primera slide
+    syncReleaseHero();
 
     // Posicion inicial: primera slide real (saltando el clone prependeado)
     var track = document.getElementById("atl-track");
@@ -207,6 +231,7 @@
     _atlIdx = logicalIdx;
     track.style.transform = "translateX(-" + (physIdx * 100) + "%)";
     updateDots();
+    syncReleaseHero();      // hero bg sigue la slide activa
     setTimeout(function(){
       _animating = false;
       if (postCb) postCb();
