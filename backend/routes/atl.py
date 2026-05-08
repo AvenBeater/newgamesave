@@ -167,6 +167,53 @@ def _enrich_with_bundles_count(games, currency):
                 g["bundlesCount"] = 0
 
 
+def _enrich_with_screenshot(games):
+    """
+    Para cada juego trae el primer screenshot de gameplay desde
+    /api/appdetails (campo `screenshots[0].path_full`). Lo usamos
+    como bg del release-hero (bleeding) — distinto del library_hero
+    que va en el slide para evitar duplicacion visual.
+
+    Si appdetails no devuelve screenshots, dejamos None y el frontend
+    cae al library_hero como fallback.
+    """
+    if not games:
+        return
+
+    def _fetch(game):
+        try:
+            r = requests.get(
+                "https://store.steampowered.com/api/appdetails",
+                params={"appids": game["appid"], "l": "english"},
+                headers=STEAM_HEADERS,
+                timeout=8,
+            )
+            if r.status_code != 200:
+                return None
+            blob = r.json() or {}
+            entry = blob.get(str(game["appid"])) or {}
+            if not entry.get("success"):
+                return None
+            data = entry.get("data") or {}
+            shots = data.get("screenshots") or []
+            if not shots:
+                return None
+            return shots[0].get("path_full") or None
+        except Exception:
+            return None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(games)) as ex:
+        futures = {ex.submit(_fetch, g): g for g in games}
+        for future in concurrent.futures.as_completed(futures):
+            g = futures[future]
+            try:
+                url = future.result()
+                if url:
+                    g["screenshot"] = url
+            except Exception:
+                pass
+
+
 def _validate_and_upgrade_covers(games):
     """
     HEAD checks paralelos a `library_hero.jpg`. Si existe como imagen real
@@ -261,6 +308,9 @@ def api_atl_today():
     # Cantidad de bundles en Steam que contienen cada juego (se muestra como
     # contador debajo del precio, independiente del store del deal).
     _enrich_with_bundles_count(games, currency)
+
+    # Screenshot de gameplay para el release-hero bleeding bg (experimental).
+    _enrich_with_screenshot(games)
 
     _atl_cache[currency] = (now, games)
     return jsonify({"games": games[:limit]})
