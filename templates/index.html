@@ -39,24 +39,6 @@
     </div>
   </section>
 
-  <div class="controls-bar">
-    <select class="ctrl-select" id="sel-lang" onchange="onLangChange()">
-      <option value="en">&#127482;&#127480; English</option>
-      <option value="es">&#127758; Español</option>
-      <option value="pt">&#127463;&#127479; Português</option>
-      <option value="fr">&#127467;&#127479; Français</option>
-    </select>
-    <select class="ctrl-select" id="sel-currency" onchange="onCurrencyChange()">
-      <option value="USD">&#127482;&#127480; USD</option>
-      <option value="COP">&#127464;&#127476; COP</option>
-      <option value="MXN">&#127474;&#127485; MXN</option>
-      <option value="ARS">&#127462;&#127479; ARS</option>
-      <option value="BRL">&#127463;&#127479; BRL</option>
-      <option value="CLP">&#127464;&#127473; CLP</option>
-      <option value="EUR">&#127466;&#127482; EUR</option>
-    </select>
-  </div>
-
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" id="tab-search" onclick="switchTab('search')"><span class="pa-icon pa-icon-search"></span> Search game</button>
@@ -78,14 +60,16 @@
       <div class="results-header">
         <h2 id="game-title"></h2>
         <span class="game-subtitle" id="game-subtitle"></span>
+      </div>
+      <div class="game-card" id="best-deal"></div>
+      <div class="status-row">
+        <div class="status" id="status"></div>
         <div class="view-controls">
           <button class="view-btn active" id="btn-grid"  onclick="setView('grid')"  title="Grid"><span class="pa-icon pa-icon-grid"></span></button>
           <button class="view-btn"        id="btn-list"  onclick="setView('list')"  title="List"><span class="pa-icon pa-icon-list"></span></button>
           <button class="view-btn"        id="btn-table" onclick="setView('table')" title="Table"><span class="pa-icon pa-icon-table"></span></button>
         </div>
       </div>
-      <div class="game-card" id="best-deal"></div>
-      <div class="status"    id="status"></div>
       <div class="price-grid" id="price-grid"></div>
     </div>
     <div class="empty" id="empty">
@@ -159,7 +143,28 @@
   </div>
 
 </div>
-<footer id="ui-footer">NewGame+Save &mdash; Rate updated in real time</footer>
+<footer id="ui-footer">
+  <div class="footer-content">
+    <span class="footer-text">NewGame+Save &mdash; Rate updated in real time</span>
+    <div class="controls-bar">
+      <select class="ctrl-select" id="sel-lang" onchange="onLangChange()">
+        <option value="en">&#127482;&#127480; English</option>
+        <option value="es">&#127758; Español</option>
+        <option value="pt">&#127463;&#127479; Português</option>
+        <option value="fr">&#127467;&#127479; Français</option>
+      </select>
+      <select class="ctrl-select" id="sel-currency" onchange="onCurrencyChange()">
+        <option value="USD">&#127482;&#127480; USD</option>
+        <option value="COP">&#127464;&#127476; COP</option>
+        <option value="MXN">&#127474;&#127485; MXN</option>
+        <option value="ARS">&#127462;&#127479; ARS</option>
+        <option value="BRL">&#127463;&#127479; BRL</option>
+        <option value="CLP">&#127464;&#127473; CLP</option>
+        <option value="EUR">&#127466;&#127482; EUR</option>
+      </select>
+    </div>
+  </div>
+</footer>
 
 <!--
   AdSense slot — vacío hasta aprobar AdSense + deploy.
