@@ -587,7 +587,7 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
 .toast-info .pa-icon{background-color:var(--muted);}
 
 /* ── ALL-TIME LOW SLIDER ─────────────────────────────────────────── */
-.atl-banner{margin-bottom:24px;animation:fadeUp .35s ease both;}
+.atl-banner{position:relative;margin-bottom:24px;animation:fadeUp .35s ease both;}
 
 /* Loading state minimal: moneda cayendo (estilo arcade) + texto "INSERT
    COIN" parpadeando. Sin caja, sin border, sin scanlines — solo el

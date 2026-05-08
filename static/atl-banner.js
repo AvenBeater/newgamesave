@@ -119,8 +119,8 @@
       + "<div class='atl-slider'>"
       +   "<div class='atl-track' id='atl-track'>" + slidesHtml + "</div>"
       +   navHtml
-      +   dotsHtml
-      + "</div>";
+      + "</div>"
+      + dotsHtml;
 
     el.innerHTML = html;
     el.style.display = "block";
