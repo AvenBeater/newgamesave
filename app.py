@@ -50,4 +50,10 @@ if __name__ == "__main__":
     print("  Presiona Ctrl+C para cerrar")
     print("=" * 50 + "\n")
     threading.Thread(target=_open_browser, daemon=True).start()
+    # TEMPLATES_AUTO_RELOAD=True asi cuando se edita un .html Jinja2 lo
+    # recarga en la siguiente request en vez de servir el cache. Sin esto
+    # el server local sirve templates viejos hasta que se reinicia y los
+    # cambios "no se ven" aunque esten en disco.
+    app.config["TEMPLATES_AUTO_RELOAD"] = True
+    app.jinja_env.auto_reload = True
     app.run(debug=False, port=5000)

@@ -5,9 +5,10 @@ from .prices import bp_prices
 from .wishlist import bp_wishlist
 from .scores import bp_scores
 from .sentry_tunnel import bp_sentry_tunnel
+from .atl import bp_atl
 
 
-ALL_BLUEPRINTS = [bp_home, bp_prices, bp_wishlist, bp_scores, bp_sentry_tunnel]
+ALL_BLUEPRINTS = [bp_home, bp_prices, bp_wishlist, bp_scores, bp_sentry_tunnel, bp_atl]
 
 
 def register_all(app):
