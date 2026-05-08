@@ -3,7 +3,7 @@
 // con pausa en hover/focus.
 
 (function(){
-  var ATL_LIMIT = 5;
+  var ATL_LIMIT = 7;
   var AUTO_MS = 10000;
   var TRANSITION_MS = 450;
 

@@ -1,13 +1,22 @@
-# routes/atl.py — All-Time Low banner (juegos en precio historico minimo hoy)
+# routes/atl.py — Featured deals banner.
+# Fuente: Steam Storefront API `featuredcategories` (endpoint JSON publico,
+# misma familia que appdetails/storesearch que ya usamos). Combina
+# `specials` (deals curados por Steam) + `top_sellers` (mas vendidos del
+# momento), dedupe por appid, filtra los que tengan descuento real.
+# new_releases queda fuera por baja calidad de catalogo (mayormente indies
+# muy chicos).
 
 import time
-import concurrent.futures
 import requests
 from flask import Blueprint, jsonify, request
 
-from ..config import ITAD_API_KEY, CURRENCY_CONFIG
-from ..currency import get_exchange_rates
-from ..itad_api import _convert
+from ..config import CURRENCY_CONFIG, STEAM_LANG, STEAM_HEADERS
+
+# Map currency → idioma del frontend, para pasarle a Steam el `l` correcto.
+_CURRENCY_TO_LANG = {
+    "COP": "es", "USD": "en", "MXN": "es", "ARS": "es",
+    "BRL": "pt", "CLP": "es", "EUR": "es",
+}
 
 
 bp_atl = Blueprint("atl", __name__)
@@ -16,191 +25,89 @@ _atl_cache = {}              # {currency: (timestamp, [games])}
 _CACHE_TTL = 30 * 60         # 30 min
 
 
-def _fetch_deals(country, with_filter=True):
-    params = {
-        "key": ITAD_API_KEY,
-        "country": country,
-        "limit": 50,
-        "sort": "-cut",
-    }
-    if with_filter:
-        params["filter"] = "N4"     # ITAD: nuevo historical low
-    try:
-        r = requests.get(
-            "https://api.isthereanydeal.com/deals/v2",
-            params=params,
-            timeout=10,
-        )
-        if r.status_code == 200:
-            return r.json().get("list", [])
-    except Exception as e:
-        print(f"[atl] fetch error: {e}")
-    return []
-
-
-def _is_atl(deal):
-    """Verifica si el deal está al historical low (precio actual ≈ history low)."""
-    price = deal.get("price", {}).get("amount", 0)
-    hl = deal.get("historyLow") or {}
-    hl_amt = hl.get("amount", 0)
-    return hl_amt > 0 and abs(hl_amt - price) <= max(0.01, hl_amt * 0.01)
-
-
-def _build_game(entry, currency, usd_rate, rates):
-    # Solo juegos. ITAD también lista bundles, DLCs, software.
-    if entry.get("type") != "game":
+def _build_game(item, currency):
+    appid = item.get("id")
+    if not appid:
         return None
 
-    deal = entry.get("deal") or {}
-    price_info = deal.get("price") or {}
-    regular_info = deal.get("regular") or {}
-    price_amt = price_info.get("amount", 0)
-    reg_amt = regular_info.get("amount", price_amt)
+    discount = item.get("discount_percent") or 0
+    if discount <= 0:
+        return None  # solo juegos con descuento real
 
-    if reg_amt <= 0:
+    final_cents = item.get("final_price") or 0
+    original_cents = item.get("original_price") or 0
+    if final_cents <= 0 or original_cents <= 0:
         return None
 
-    price_cur = price_info.get("currency", "USD")
+    name = (item.get("name") or "").strip()
+    if not name:
+        return None
 
-    assets = entry.get("assets") or {}
+    appid_str = str(appid)
     cover_fallback = (
-        assets.get("banner600")
-        or assets.get("banner400")
-        or assets.get("banner300")
-        or assets.get("boxart")
-        or ""
+        item.get("large_capsule_image")
+        or item.get("header_image")
+        or f"https://cdn.akamai.steamstatic.com/steam/apps/{appid_str}/capsule_616x353.jpg"
     )
 
-    shop = deal.get("shop") or {}
-
     return {
-        "title":          entry.get("title", ""),
-        "slug":           entry.get("slug", ""),
-        "appid":          "",                # se rellena en _enrich_with_appids
-        "cover":          cover_fallback,    # default a banner ITAD; reemplazado si hay appid
+        "title":          name,
+        "appid":          appid_str,
+        "cover":          f"https://cdn.akamai.steamstatic.com/steam/apps/{appid_str}/library_hero.jpg",
         "coverFallback":  cover_fallback,
-        "store":          shop.get("name", ""),
-        "storeId":        str(shop.get("id", "")).lower(),
-        "priceNative":    round(_convert(price_amt, price_cur, currency, usd_rate, rates), 2),
-        "originalNative": round(_convert(reg_amt,   price_cur, currency, usd_rate, rates), 2),
-        "discount":       deal.get("cut", 0),
+        "store":          "Steam",
+        "storeId":        "steam",
+        "priceNative":    round(final_cents / 100, 2),
+        "originalNative": round(original_cents / 100, 2),
+        "discount":       discount,
         "currency":       currency,
-        "url":            deal.get("url", "#"),
-        "isAtl":          _is_atl(deal),
+        "url":            f"https://store.steampowered.com/app/{appid_str}/",
     }
-
-
-def _fetch_game_info(itad_id):
-    """
-    Lookup en ITAD para sacar Steam appid + Steam review count/score (señal de
-    relevancia / popularidad). Retorna {} si falla.
-    """
-    try:
-        r = requests.get(
-            "https://api.isthereanydeal.com/games/info/v2",
-            params={"key": ITAD_API_KEY, "id": itad_id},
-            timeout=8,
-        )
-        if r.status_code != 200:
-            return {}
-        data = r.json() or {}
-        out = {}
-        appid = data.get("appid")
-        if appid:
-            out["appid"] = str(appid)
-        # Buscar review de Steam para usar como relevancia
-        for review in data.get("reviews", []) or []:
-            if review.get("source") == "Steam":
-                out["reviewCount"] = review.get("count", 0) or 0
-                out["reviewScore"] = review.get("score", 0) or 0
-                break
-        return out
-    except Exception:
-        return {}
-
-
-def _enrich_with_info(pairs):
-    """
-    Lookup paralelo de info de cada juego en ITAD:
-    - Steam appid → cover upgrade a library_hero.jpg (1920x620, mas nitido que
-      el banner600 de ITAD a ancho full-container).
-    - Steam reviewCount / reviewScore → señal de relevancia (mas reviews = mas
-      popular). Usado para ordenar el slider de mas a menos relevante.
-    pairs = [(game_dict, itad_id), ...]
-    Muta los game_dict in-place.
-    """
-    if not pairs:
-        return
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
-        futures = {ex.submit(_fetch_game_info, gid): g for g, gid in pairs}
-        for future in concurrent.futures.as_completed(futures):
-            g = futures[future]
-            try:
-                info = future.result()
-                appid = info.get("appid")
-                if appid:
-                    g["appid"] = appid
-                    g["cover"] = (
-                        f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/library_hero.jpg"
-                    )
-                    # coverFallback ya viene del banner ITAD; si library_hero 404ea
-                    # el frontend revierte al banner ITAD via onerror.
-                g["reviewCount"] = info.get("reviewCount", 0)
-                g["reviewScore"] = info.get("reviewScore", 0)
-            except Exception:
-                pass
 
 
 @bp_atl.route("/api/atl-today")
 def api_atl_today():
     currency = request.args.get("currency", "COP")
     try:
-        limit = min(max(int(request.args.get("limit", 10)), 1), 20)
+        limit = min(max(int(request.args.get("limit", 7)), 1), 20)
     except ValueError:
-        limit = 10
+        limit = 7
 
     now = time.time()
     cached = _atl_cache.get(currency)
     if cached and now - cached[0] < _CACHE_TTL:
         return jsonify({"games": cached[1][:limit]})
 
-    cc = CURRENCY_CONFIG.get(currency, CURRENCY_CONFIG["COP"])["itad_country"]
-    rates = get_exchange_rates()
-    usd_rate = rates.get(
-        currency,
-        CURRENCY_CONFIG.get(currency, {}).get("fallback_usd_rate", 1),
-    )
-
-    items = _fetch_deals(cc, with_filter=True)
-    if not items:
-        items = _fetch_deals(cc, with_filter=False)
+    cc = CURRENCY_CONFIG.get(currency, CURRENCY_CONFIG["COP"])["cc"]
+    lang_short = _CURRENCY_TO_LANG.get(currency, "en")
+    steam_lang = STEAM_LANG.get(lang_short, "english")
 
     games = []
-    pairs = []
-    for entry in items:
-        g = _build_game(entry, currency, usd_rate, rates)
-        if not g or not g["title"]:
-            continue
-        games.append(g)
-        pairs.append((g, entry["id"]))
-        if len(games) >= 20:
-            break
-
-    # Lookup paralelo: Steam appid (cover upgrade) + reviews (relevancia)
-    _enrich_with_info(pairs)
-
-    # Filtramos primero a los que estan en historical low real, despues
-    # ordenamos por score (% positive) descendente: mejor puntaje arriba.
-    # Tiebreak por reviewCount, asi entre dos juegos con el mismo score,
-    # gana el que tiene mas volumen de reviews (mas confianza).
-    atl_games = [g for g in games if g["isAtl"]]
-    other_games = [g for g in games if not g["isAtl"]]
-
-    sort_key = lambda g: (g.get("reviewScore", 0) or 0, g.get("reviewCount", 0) or 0)
-    atl_games.sort(key=sort_key, reverse=True)
-    other_games.sort(key=sort_key, reverse=True)
-
-    games = atl_games + other_games
+    seen = set()
+    try:
+        r = requests.get(
+            "https://store.steampowered.com/api/featuredcategories",
+            params={"cc": cc, "l": steam_lang},
+            headers=STEAM_HEADERS,
+            timeout=10,
+        )
+        if r.status_code == 200:
+            data = r.json() or {}
+            # specials primero (deals curados), top_sellers despues como fill.
+            # Dedupe por appid: si un juego sale en ambas secciones, queda la
+            # version de specials (suele tener mejor descuento exhibido).
+            for section_key in ("specials", "top_sellers"):
+                section = data.get(section_key) or {}
+                for item in (section.get("items") or []):
+                    appid = item.get("id")
+                    if not appid or appid in seen:
+                        continue
+                    g = _build_game(item, currency)
+                    if g:
+                        games.append(g)
+                        seen.add(appid)
+    except Exception as e:
+        print(f"[featured] fetch error: {e}")
 
     _atl_cache[currency] = (now, games)
     return jsonify({"games": games[:limit]})
