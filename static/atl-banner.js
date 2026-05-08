@@ -85,6 +85,39 @@
     return html;
   }
 
+  // Cross-fade + Ken Burns entre dos slots .rh-layer dentro del
+  // #release-hero-bg. Alternamos cual slot tiene `.active` para que la
+  // imagen entrante haga fade-in + zoom-out sutil mientras la saliente
+  // hace fade-out + zoom-in (vuelve a scale 1.04 por default).
+  // `_heroSlot` arranca en -1 (nada activo) y va alternando 0 <-> 1.
+  var _heroSlot = -1;
+
+  function syncReleaseHero(){
+    var bg = document.getElementById("release-hero-bg");
+    if (!bg || !_atlGames.length) return;
+    var g = _atlGames[_atlIdx];
+    if (!g) return;
+    var url = g.screenshot || g.cover || g.coverFallback;
+    if (!url) return;
+    var slots = bg.querySelectorAll(".rh-layer");
+    if (slots.length !== 2) return;
+    var nextIdx = (_heroSlot + 1) % 2;
+    var prevIdx = _heroSlot;
+    var img = new Image();
+    img.onload = function(){
+      var next = slots[nextIdx];
+      next.style.backgroundImage = "url('" + url + "')";
+      // Reflow para que la transicion arranque desde el estado base
+      // (opacity 0, scale 1.04) en vez de saltar al estado active.
+      void next.offsetWidth;
+      next.classList.add("active");
+      if (prevIdx >= 0) slots[prevIdx].classList.remove("active");
+      _heroSlot = nextIdx;
+      if (!bg.classList.contains("loaded")) bg.classList.add("loaded");
+    };
+    img.src = url;
+  }
+
   function renderAtlBanner(games){
     _atlGames = games;
     _atlIdx = 0;
@@ -132,6 +165,9 @@
 
     el.innerHTML = html;
     el.style.display = "block";
+
+    // Hero bg sync con la primera slide
+    syncReleaseHero();
 
     // Posicion inicial: primera slide real (saltando el clone prependeado)
     var track = document.getElementById("atl-track");
@@ -207,6 +243,7 @@
     _atlIdx = logicalIdx;
     track.style.transform = "translateX(-" + (physIdx * 100) + "%)";
     updateDots();
+    syncReleaseHero();      // hero bg sigue la slide activa
     setTimeout(function(){
       _animating = false;
       if (postCb) postCb();

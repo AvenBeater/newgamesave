@@ -170,21 +170,43 @@ function applyLang(){
 }
 
 // ── Rate ────────────────────────────────────────────────────────
+// Si /api/rate falla o devuelve un valor invalido mostramos `(est.)` y
+// reintenta con backoff hasta conseguir una conversion real. Si el user
+// cambia de moneda mientras hay un retry pendiente, cancelamos el timer
+// viejo y arrancamos de cero (control via `_rateRetryTimer` + comparacion
+// `currentCurrency === targetCurrency` dentro del attempt).
+var _rateRetryTimer=null;
+var _rateAttempt=0;
+var _RATE_RETRY_DELAYS_MS=[1500,3000,6000,12000,20000];
+
 async function loadRate(){
+  if(_rateRetryTimer){clearTimeout(_rateRetryTimer);_rateRetryTimer=null;}
+  _rateAttempt=0;
+  _attemptLoadRate(currentCurrency);
+}
+
+async function _attemptLoadRate(targetCurrency){
+  // El user cambio de moneda mientras esperabamos un retry: abortar.
+  if(currentCurrency!==targetCurrency)return;
   try{
     var ctrl=new AbortController();
     var to=setTimeout(function(){ctrl.abort();},4000);
-    var r=await fetch("/api/rate?currency="+currentCurrency,{signal:ctrl.signal});
+    var r=await fetch("/api/rate?currency="+targetCurrency,{signal:ctrl.signal});
     clearTimeout(to);
     var d=await r.json();
     if(d.rate&&d.rate>0){
       currentRate=d.rate;
       document.getElementById("rate-text").textContent=
-        "USD \u2192 "+currentCurrency+": "+fmtPrice(d.rate)+" \u00b7 "+t("updated");
+        "USD \u2192 "+targetCurrency+": "+fmtPrice(d.rate)+" \u00b7 "+t("updated");
+      _rateAttempt=0;
+      return;
     }
-  }catch(e){
-    document.getElementById("rate-text").textContent=currentCurrency+" (est.)";
-  }
+  }catch(e){}
+  // Fallo: marcar (est.) y agendar retry. Cap a 20s entre intentos.
+  document.getElementById("rate-text").textContent=targetCurrency+" (est.)";
+  var idx=Math.min(_rateAttempt,_RATE_RETRY_DELAYS_MS.length-1);
+  _rateAttempt++;
+  _rateRetryTimer=setTimeout(function(){_attemptLoadRate(targetCurrency);},_RATE_RETRY_DELAYS_MS[idx]);
 }
 
 // ── Lang / Currency change ──────────────────────────────────────
