@@ -21,13 +21,18 @@
      hacia el bg del sitio. Si no convence, borrar este div + release-hero.js
      + el bloque CSS marcado en style.css + el blueprint new_release.py. -->
 <div id="release-hero-bg" aria-hidden="true"></div>
-<div id="release-hero-label" aria-live="polite"></div>
 <div class="container">
   <header>
     <img class="site-logo" src="/static/assets/NG+Save_IDLOGO.svg" alt="NewGame+Save" width="84" height="25.25">
     <p class="subtitle" id="ui-subtitle">Compare game prices in real time</p>
     <div class="rate-badge"><span class="dot"></span><span id="rate-text">Loading...</span></div>
   </header>
+
+  <!-- Bleeding title del juego destacado en el release-hero-bg
+       (experimental). Se llena via JS desde /api/new-release-hero. -->
+  <div class="release-hero-title-wrap" aria-live="polite">
+    <h2 class="release-hero-title" id="release-hero-title"></h2>
+  </div>
 
   <!-- All-Time Low banner. Loading state minimal: solo moneda + INSERT COIN
        (sin caja highlighteada, sin scanlines, sin progress). Texto SSR

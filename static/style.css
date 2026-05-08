@@ -9,51 +9,63 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
    + banner ATL, blurreado y con fade-out al bg del sitio (mask-image).
    Si la prueba no pega: borrar este bloque entero + el div #release-hero-bg
    en index.html + static/release-hero.js + el blueprint new_release.py.   */
+/* `top` lo setea JS dinamicamente al `offsetTop` del #ui-subtitle (el logo
+   queda intocado encima). Height fija + mask-gradient garantiza que el
+   fade termine alrededor de la mitad del slider ATL. */
 #release-hero-bg{
   position:absolute;
-  top:0;left:0;right:0;
+  left:0;right:0;
+  top:0;
   height:640px;
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
-  filter:blur(18px);
+  filter:blur(2px);
   opacity:0;
   transition:opacity .8s ease-out;
   z-index:0;
   pointer-events:none;
-  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 25%,transparent 100%);
-          mask-image:linear-gradient(to bottom,#000 0%,#000 25%,transparent 100%);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 35%,transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0%,#000 35%,transparent 100%);
 }
-#release-hero-bg.loaded{opacity:.6;}
+#release-hero-bg.loaded{opacity:.55;}
 @media(max-width:640px){
-  #release-hero-bg{height:480px;filter:blur(12px);}
+  #release-hero-bg{height:520px;filter:blur(2px);}
 }
-/* Label flotante con el titulo del juego — pointer-events:none para no
-   interferir con clicks. z-index:2 lo levanta por encima del .container
-   (z-index:1) asi se ve aunque caiga sobre contenido del header. */
-#release-hero-label{
-  position:absolute;
-  top:18px;right:24px;
-  z-index:2;
-  pointer-events:none;
-  font-family:'Space Mono',monospace;
-  font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--muted);
-  background:rgba(13,17,23,.7);
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:6px 10px;
-  max-width:min(60vw,360px);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+/* Bleeding title: gap grande entre header y slider, titulo XL centrado
+   con shadows multiples para legibilidad sobre cualquier keyart. */
+.release-hero-title-wrap{
+  position:relative;
+  z-index:1;
+  text-align:center;
+  padding:40px 0 50px;
+  min-height:130px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.release-hero-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(36px,7.5vw,88px);
+  font-weight:800;
+  letter-spacing:4px;
+  text-transform:uppercase;
+  color:#fff;
+  margin:0;
+  line-height:1;
+  text-shadow:
+    0 2px 24px rgba(0,0,0,.7),
+    0 0 60px rgba(0,0,0,.5),
+    0 0 90px rgba(0,255,135,.18);
   opacity:0;
-  transition:opacity .8s ease-out .15s;
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
+  transition:opacity 1.1s ease-out;
+  max-width:92%;
+  word-break:break-word;
 }
-#release-hero-label.loaded{opacity:1;}
-#release-hero-label .rh-tag{color:var(--accent);margin-right:8px;}
+.release-hero-title.loaded{opacity:1;}
 @media(max-width:640px){
-  #release-hero-label{top:10px;right:12px;font-size:9px;padding:5px 8px;}
+  .release-hero-title-wrap{padding:24px 0 32px;min-height:90px;}
+  .release-hero-title{letter-spacing:2px;}
 }
 /* ── END EXPERIMENTAL ─────────────────────────────────────────────── */
 header{margin-bottom:32px;text-align:center;--logo-h:clamp(36px,7vw,60px);}

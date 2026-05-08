@@ -11,14 +11,21 @@
       ? currentCurrency : "COP";
   }
 
-  function escHtml(s){
-    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
-                    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  // Posiciona el bg empezando desde el #ui-subtitle hacia abajo. El logo
+  // queda intocado encima. Recalcula on resize porque la altura del
+  // header cambia con clamp() del logo + viewport width.
+  function positionHeroTop(){
+    var bg  = document.getElementById("release-hero-bg");
+    var sub = document.getElementById("ui-subtitle");
+    if (!bg || !sub) return;
+    var rect = sub.getBoundingClientRect();
+    var docTop = rect.top + window.pageYOffset;
+    bg.style.top = Math.max(0, docTop) + "px";
   }
 
   async function loadReleaseHero(){
     var bg    = document.getElementById("release-hero-bg");
-    var label = document.getElementById("release-hero-label");
+    var title = document.getElementById("release-hero-title");
     if (!bg) return;
     try {
       var r = await fetch("/api/new-release-hero?currency=" + getCurrency());
@@ -30,10 +37,13 @@
         var img = new Image();
         img.onload = function(){
           bg.style.backgroundImage = "url('" + data.game.hero + "')";
+          positionHeroTop();   // re-pos por si layout cambio mientras cargaba
           bg.classList.add("loaded");
-          if (label) {
-            label.innerHTML = "<span class='rh-tag'>NEW</span>" + escHtml(data.game.title);
-            label.classList.add("loaded");
+          if (title) {
+            title.textContent = data.game.title;
+            title.classList.add("loaded");
+            // El title pushea el slider: re-pos del bg al asentar el layout
+            requestAnimationFrame(positionHeroTop);
           }
         };
         img.src = data.game.hero;
@@ -46,6 +56,17 @@
   window.reloadReleaseHero = loadReleaseHero;
 
   document.addEventListener("DOMContentLoaded", function(){
+    positionHeroTop();
     setTimeout(loadReleaseHero, 50);
+  });
+  // Resize cambia el offsetTop del subtitle (clamp del logo + viewport).
+  // Throttle simple con rAF para no recalcular en cada pixel del resize.
+  var _resizeRaf = null;
+  window.addEventListener("resize", function(){
+    if (_resizeRaf) return;
+    _resizeRaf = requestAnimationFrame(function(){
+      _resizeRaf = null;
+      positionHeroTop();
+    });
   });
 })();
