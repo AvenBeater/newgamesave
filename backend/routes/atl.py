@@ -12,7 +12,9 @@ import requests
 from flask import Blueprint, jsonify, request
 
 from ..config import CURRENCY_CONFIG, STEAM_LANG, STEAM_HEADERS
+from ..currency import get_exchange_rates
 from ..steam_api import has_real_library_hero
+from ..itad_api import get_all_itad_prices
 
 # Map currency → idioma del frontend, para pasarle a Steam el `l` correcto.
 _CURRENCY_TO_LANG = {
@@ -69,6 +71,62 @@ def _build_game(item, currency):
         "currency":       currency,
         "url":            f"https://store.steampowered.com/app/{appid_str}/",
     }
+
+
+def _enrich_with_best_deal(games, currency):
+    """
+    Por cada juego del banner busca el mejor precio cross-store/cross-country
+    via ITAD (mismo flow que /api/prices). Si encuentra un deal mas barato
+    que el de Steam featured, reemplaza price/store/discount/url para que el
+    banner muestre lo mismo que va a ver el usuario al hacer click.
+
+    Sin esto pasa que el banner anuncia "UNCHARTED Collection - Steam $X" pero
+    al click el mejor precio resulta ser Nuuvem $Y (mas barato), generando
+    inconsistencia visual.
+    """
+    if not games:
+        return
+
+    rates = get_exchange_rates()
+    usd_rate = rates.get(
+        currency,
+        CURRENCY_CONFIG.get(currency, {}).get("fallback_usd_rate", 1),
+    )
+
+    def _best_for(game):
+        try:
+            deals = get_all_itad_prices(game["appid"], game["title"], currency, usd_rate)
+            if not deals:
+                return None
+            return min(deals, key=lambda d: d.get("priceNative", float("inf")))
+        except Exception:
+            return None
+
+    # Outer pool con todos los juegos en paralelo. Cada `get_all_itad_prices`
+    # lanza su propio pool de 8 (los 8 paises) → 7x8 = 56 connections at peak,
+    # pero requests/HTTP pool las serializa al pool size del host. Aun asi,
+    # paralelismo outer reduce significativamente el wall time vs serial.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(games)) as ex:
+        futures = {ex.submit(_best_for, g): g for g in games}
+        for future in concurrent.futures.as_completed(futures):
+            g = futures[future]
+            try:
+                best = future.result()
+                if not best:
+                    continue
+                steam_price = g.get("priceNative", float("inf"))
+                best_price = best.get("priceNative", float("inf"))
+                # Solo reemplazar si ITAD encuentra mas barato. Si Steam ya
+                # tiene el mejor precio, dejamos el deal de Steam intacto.
+                if best_price < steam_price:
+                    g["priceNative"] = best_price
+                    g["originalNative"] = best.get("originalNative", g["originalNative"])
+                    g["discount"] = best.get("discount", g["discount"])
+                    g["store"] = best.get("storeName", g["store"])
+                    g["storeId"] = best.get("store", g["storeId"])
+                    g["url"] = best.get("url", g["url"])
+            except Exception:
+                pass
 
 
 def _validate_and_upgrade_covers(games):
@@ -141,6 +199,12 @@ def api_atl_today():
     # como el placeholder rojo de Steam. HEAD requests paralelos (~200-400ms
     # total para 7 juegos), cacheado los siguientes 30 min.
     _validate_and_upgrade_covers(games)
+
+    # Cross-store best deal: el precio de Steam featured no siempre es el mas
+    # barato. Comparamos via ITAD igual que en /api/prices y reemplazamos si
+    # otra tienda (Nuuvem, GMG, Fanatical, etc.) tiene mejor precio. Asi el
+    # banner es consistente con lo que el user ve al hacer click.
+    _enrich_with_best_deal(games, currency)
 
     _atl_cache[currency] = (now, games)
     return jsonify({"games": games[:limit]})
