@@ -16,6 +16,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.7/hls.min.js" defer></script>
 </head>
 <body>
+<!-- Release hero background (experimental) — keyart blurreado de un juego
+     recien lanzado, full-bleed detras del header + banner ATL, fade-out
+     hacia el bg del sitio. Si no convence, borrar este div + release-hero.js
+     + el bloque CSS marcado en style.css + el blueprint new_release.py. -->
+<div id="release-hero-bg" aria-hidden="true"></div>
 <div class="container">
   <header>
     <img class="site-logo" src="/static/assets/NG+Save_IDLOGO.svg" alt="NewGame+Save" width="84" height="25.25">
@@ -203,6 +208,7 @@
 <script src="/static/render.js"></script>
 <script src="/static/search.js"></script>
 <script src="/static/atl-banner.js"></script>
+<script src="/static/release-hero.js"></script>
 <script src="/static/wishlist-hltb.js"></script>
 <script src="/static/wishlist-reviews.js"></script>
 <script src="/static/wishlist-metacritic.js"></script>
