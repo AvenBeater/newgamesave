@@ -675,6 +675,14 @@ footer{text-align:center;padding:40px 0 20px;color:var(--muted);font-size:11px;l
   .atl-slide-original{font-size:11px;}
   .atl-slide-discount{font-size:11px;padding:2px 8px;}
   .atl-slide-cta{padding:7px 14px;font-size:11px;margin-top:10px;}
-  .atl-header{font-size:10px;letter-spacing:2px;}
+  /* Header centrado y un poco mas grande para que tenga peso visual */
+  .atl-header{font-size:14px;letter-spacing:2px;justify-content:center;}
+  .atl-header .pa-icon{font-size:14px;}
   .atl-dots{bottom:10px;}
+  /* Flechas de navegacion fuera — en mobile se navega por swipe */
+  .atl-nav{display:none;}
+  /* Slider full-width: rompe el padding horizontal del .container con margin
+     negativo. border-radius/borde laterales fuera para que llegue al borde
+     del viewport sin "ventanita". */
+  .atl-slider{margin-left:-24px;margin-right:-24px;border-radius:0;border-left:0;border-right:0;}
 }

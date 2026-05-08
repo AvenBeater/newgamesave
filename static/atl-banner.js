@@ -12,6 +12,7 @@
   var _atlPhysIdx = 1;      // posicion fisica en el track con clones (0=clone last, 1..n=reales, n+1=clone first)
   var _autoTimer = null;
   var _animating = false;
+  var _atlJustSwiped = false;  // flag: el touchend disparo nav, ignorar el click que sigue
 
   function getCurrency(){
     return (typeof currentCurrency !== "undefined" && currentCurrency) ? currentCurrency : "COP";
@@ -145,8 +146,46 @@
         if (e.key === "ArrowLeft") { e.preventDefault(); atlPrev(); }
         else if (e.key === "ArrowRight") { e.preventDefault(); atlNext(); }
       });
+      attachTouchSwipe(slider);
       startAuto();
     }
+  }
+
+  // Swipe horizontal en mobile/tablet para navegar slides. Threshold 50px y
+  // movimiento mayoritariamente horizontal (descarta scroll vertical).
+  // Listeners passive para no bloquear scroll del documento.
+  function attachTouchSwipe(slider){
+    var sx = 0, sy = 0, dx = 0, dy = 0, gesturing = false;
+    var SWIPE_MIN = 50;
+
+    slider.addEventListener("touchstart", function(e){
+      if (e.touches.length !== 1) return;
+      var t = e.touches[0];
+      sx = t.clientX; sy = t.clientY;
+      dx = 0; dy = 0;
+      gesturing = false;
+      stopAuto();
+    }, { passive: true });
+
+    slider.addEventListener("touchmove", function(e){
+      if (e.touches.length !== 1) return;
+      var t = e.touches[0];
+      dx = t.clientX - sx;
+      dy = t.clientY - sy;
+      // Marcamos como gesto horizontal si el movimiento X domina al Y
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) gesturing = true;
+    }, { passive: true });
+
+    slider.addEventListener("touchend", function(){
+      if (gesturing && Math.abs(dx) >= SWIPE_MIN) {
+        if (dx > 0) atlPrev(); else atlNext();
+        // El touchend dispara un click sintetico inmediato; lo ignoramos por
+        // ~350ms para que el swipe no abra la pagina del juego sin querer.
+        _atlJustSwiped = true;
+        setTimeout(function(){ _atlJustSwiped = false; }, 350);
+      }
+      startAuto();
+    }, { passive: true });
   }
 
   // ── Animacion + jump (truco del clone) ────────────────────────
@@ -258,6 +297,7 @@
   };
 
   window.atlSlideClick = function(i){
+    if (_atlJustSwiped) return;        // Ignorar click sintetico post-swipe
     var g = _atlGames[i];
     if (!g) return;
     if (typeof switchTab === "function") switchTab("search");
