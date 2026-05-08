@@ -117,7 +117,11 @@ function applyLang(){
   document.getElementById("search-input").placeholder = t("searchPH");
   document.getElementById("ui-loading").textContent   = t("loading");
   document.getElementById("ui-empty").textContent     = t("empty");
-  document.getElementById("ui-footer").textContent    = t("footer");
+  // Solo el tag textual del footer, NO `#ui-footer` directo: el footer
+  // contiene tambien los selectores de idioma/moneda y un .textContent= los
+  // borraria a todos.
+  var _footerTag = document.querySelector("#ui-footer .footer-tag");
+  if(_footerTag) _footerTag.textContent = t("footer");
   // Tabs
   document.getElementById("tab-search").innerHTML   = '<span class="pa-icon pa-icon-search"></span> ' + t("tabSearch");
   var _wlBadge = document.getElementById("wl-deal-badge");
