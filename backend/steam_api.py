@@ -12,6 +12,35 @@ def steam_get(url, params=None, timeout=10):
     return requests.get(url, params=params, headers=STEAM_HEADERS, timeout=timeout)
 
 
+# ── Validacion de library_hero ──────────────────────────────────────────────
+# Cuando un juego no tiene library_hero.jpg propio en el CDN simple, Steam
+# responde 200 con un placeholder generico (~14KB tinte rojo). Imagenes hero
+# reales pesan 60KB+. El threshold permite distinguir placeholder de imagen
+# real sin descargar el body.
+_LIBRARY_HERO_MIN_BYTES = 25_000
+
+
+def has_real_library_hero(appid):
+    """HEAD a library_hero.jpg. True si existe y no es el placeholder."""
+    if not appid:
+        return False
+    try:
+        r = requests.head(
+            f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/library_hero.jpg",
+            headers=STEAM_HEADERS,
+            timeout=4,
+            allow_redirects=False,
+        )
+        if r.status_code != 200:
+            return False
+        try:
+            return int(r.headers.get("Content-Length", 0)) >= _LIBRARY_HERO_MIN_BYTES
+        except (ValueError, TypeError):
+            return False
+    except Exception:
+        return False
+
+
 # ── Búsqueda ─────────────────────────────────────────────────────────────────
 
 def search_steam_games(query, lang="es", currency="COP"):
@@ -546,9 +575,11 @@ def get_appdetails_full(appid, lang="es"):
     game_info      = {}
     localized_name = ""
     mature         = False
+    header_image   = ""    # URL con hash que Steam siempre tiene (a diferencia
+                           # del CDN simple `apps/{id}/header.jpg` que a veces 404ea)
 
     if not appid:
-        return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
+        return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature, "headerImage": header_image}
 
     steam_lang = STEAM_LANG.get(lang, "english")
     try:
@@ -557,14 +588,15 @@ def get_appdetails_full(appid, lang="es"):
             timeout=8,
         )
         if md.status_code != 200:
-            return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
+            return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature, "headerImage": header_image}
 
         md_data = md.json().get(str(appid), {})
         if not (isinstance(md_data, dict) and md_data.get("success")):
-            return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
+            return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature, "headerImage": header_image}
 
         d = md_data.get("data", {})
         localized_name = d.get("name", "")
+        header_image = d.get("header_image", "") or ""
 
         # Trailers
         for mov in (d.get("movies") or [])[:3]:
@@ -645,7 +677,7 @@ def get_appdetails_full(appid, lang="es"):
     except Exception as e:
         print(f"Steam appdetails error: {e}")
 
-    return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature}
+    return {"media": media, "gameInfo": game_info, "localizedName": localized_name, "mature": mature, "headerImage": header_image}
 
 
 def _parse_price(text):

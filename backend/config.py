@@ -11,23 +11,33 @@ except ImportError:
 
 # ── Sentry (errores en backend) ──────────────────────────────────────────────
 # Init temprano: se hace antes de que Flask reciba requests.
-# Si SENTRY_DSN_BACKEND no está seteado, simplemente no se inicializa (modo dev sin tracking).
-try:
-    import sentry_sdk
-    from sentry_sdk.integrations.flask import FlaskIntegration
+#
+# En entorno local (sin RAILWAY_ENVIRONMENT) NO se inicializa Sentry — asi los
+# crashes de scripts ad-hoc, REPL, tests, etc. no consumen la cuota mensual
+# gratuita. Para probar Sentry localmente sin deploy, opt-in con SENTRY_LOCAL=1.
+# En Railway / produccion siempre se inicializa si hay DSN.
+_SENTRY_DISABLED_LOCAL = (
+    not os.environ.get("RAILWAY_ENVIRONMENT")
+    and os.environ.get("SENTRY_LOCAL") != "1"
+)
 
-    _sentry_dsn = os.environ.get("SENTRY_DSN_BACKEND", "").strip()
-    if _sentry_dsn:
-        sentry_sdk.init(
-            dsn=_sentry_dsn,
-            integrations=[FlaskIntegration()],
-            send_default_pii=True,
-            traces_sample_rate=0.1,  # 10% de requests para performance monitoring
-            release=os.environ.get("RAILWAY_GIT_COMMIT_SHA") or "dev",
-            environment=os.environ.get("RAILWAY_ENVIRONMENT") or "local",
-        )
-except ImportError:
-    pass
+if not _SENTRY_DISABLED_LOCAL:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+
+        _sentry_dsn = os.environ.get("SENTRY_DSN_BACKEND", "").strip()
+        if _sentry_dsn:
+            sentry_sdk.init(
+                dsn=_sentry_dsn,
+                integrations=[FlaskIntegration()],
+                send_default_pii=True,
+                traces_sample_rate=0.1,  # 10% de requests para performance monitoring
+                release=os.environ.get("RAILWAY_GIT_COMMIT_SHA") or "dev",
+                environment=os.environ.get("RAILWAY_ENVIRONMENT") or "local",
+            )
+    except ImportError:
+        pass
 
 ITAD_API_KEY = os.environ.get("ITAD_API_KEY", "").strip()
 if not ITAD_API_KEY:
@@ -36,8 +46,13 @@ if not ITAD_API_KEY:
         "con la línea ITAD_API_KEY=tu_clave_aqui (ver .env.example)."
     )
 
-# DSN público del frontend, expuesto al template para inicializar Sentry en el browser
-SENTRY_DSN_FRONTEND = os.environ.get("SENTRY_DSN_FRONTEND", "").strip()
+# DSN público del frontend, expuesto al template para inicializar Sentry en el
+# browser. Vacio en local para que sentry-init.js sea no-op (igual que el
+# backend) — asi tampoco consume cuota desde el navegador en dev.
+SENTRY_DSN_FRONTEND = (
+    "" if _SENTRY_DISABLED_LOCAL
+    else os.environ.get("SENTRY_DSN_FRONTEND", "").strip()
+)
 
 CURRENCY_CONFIG = {
     "COP": {"cc": "CO", "itad_country": "CO", "symbol": "$",    "fallback_usd_rate": 4200},

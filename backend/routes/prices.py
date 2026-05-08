@@ -6,6 +6,7 @@ from ..config import CURRENCY_CONFIG
 from ..currency import get_exchange_rates
 from ..steam_api import (
     search_steam_games, get_steam_price, get_steam_bundles, get_appdetails_full,
+    has_real_library_hero,
 )
 from ..itad_api import get_all_itad_prices
 
@@ -54,13 +55,27 @@ def api_prices():
             if not is_steam:
                 all_prices.append(p)
 
-    cover          = f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/library_hero.jpg" if appid else ""
-    cover_fallback = f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/capsule_616x353.jpg" if appid else ""
-
     details = get_appdetails_full(appid, lang)
     media          = details["media"]
     game_info      = details["gameInfo"]
     localized_name = details["localizedName"] or name
+    header_image   = details.get("headerImage") or ""
+
+    # Cover: validamos library_hero.jpg (algunos juegos no lo tienen propio,
+    # Steam responde 200 con un placeholder rojo de ~14KB). Si el HEAD lo
+    # confirma como imagen real, usamos esa version 1920x620 nitida; si no,
+    # caemos al `header_image` hasheado de appdetails (siempre real, ~460x215).
+    if appid and has_real_library_hero(appid):
+        cover = f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/library_hero.jpg"
+    else:
+        cover = header_image or (
+            f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/capsule_616x353.jpg"
+            if appid else ""
+        )
+    cover_fallback = header_image or (
+        f"https://cdn.akamai.steamstatic.com/steam/apps/{appid}/capsule_616x353.jpg"
+        if appid else ""
+    )
 
     cc = CURRENCY_CONFIG.get(currency, CURRENCY_CONFIG["COP"])["cc"]
     steam_bundles = get_steam_bundles(appid, cc) if appid else []
