@@ -22,7 +22,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   background-size:cover;
   background-position:center top;
   background-repeat:no-repeat;
-  filter:blur(2px);
+  filter:blur(3px);
   opacity:0;
   transition:opacity .8s ease-out;
   z-index:0;
